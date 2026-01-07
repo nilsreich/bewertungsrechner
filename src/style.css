@@ -32,3 +32,157 @@ input::-webkit-inner-spin-button {
   color: white !important;
   box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
+
+@media print {
+  @page {
+    size: A4;
+    margin: 2.5cm;
+  }
+
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  body {
+    background: white !important;
+    font-size: 9pt !important;
+    line-height: 1.2;
+  }
+
+  .no-print, 
+  [name="rounding"], 
+  .segment-button, 
+  .segment-button + label,
+  .bg-slate-200.dark\:bg-neutral-900\/80,
+  #distributionLegend,
+  script,
+  #print-button-container { 
+    display: none !important;
+  }
+
+  #app, .max-w-2xl, div {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    position: static !important;
+    display: block !important;
+  }
+
+  .sticky {
+    position: static !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Primitive Title/Header */
+  label[for="maxPoints"], .tracking-\[0\.2em\], h2 {
+    font-size: 9pt !important;
+    font-weight: bold !important;
+    text-transform: none !important;
+    margin: 0.5rem 0 0.1rem 0 !important;
+    text-align: left !important;
+    letter-spacing: normal !important;
+  }
+
+  #maxPoints {
+    border: none !important;
+    border-bottom: 1pt solid black !important;
+    font-size: 11pt !important;
+    font-weight: bold !important;
+    width: 60px !important;
+    padding: 0 !important;
+    margin-bottom: 0.5rem !important;
+    text-align: left !important;
+  }
+
+  /* Primitive Table */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border: 0.5pt solid black !important;
+    margin: 0.5rem 0 !important;
+    table-layout: auto !important;
+  }
+
+  th, td {
+    border: 0.5pt solid black !important;
+    padding: 2pt 5pt !important;
+    text-align: left !important;
+    font-size: 8.5pt !important;
+  }
+
+  th {
+    font-weight: bold !important;
+    background: #eee !important;
+  }
+
+  .text-right { text-align: right !important; }
+  .text-center { text-align: center !important; }
+
+  /* Grade Average primitive rendering */
+  #gradeInputsContainer {
+    display: table !important;
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+    border: 0.5pt solid black !important;
+  }
+
+  #gradeInputsContainer > div {
+    display: table-cell !important;
+    border: 0.5pt solid black !important;
+    padding: 1pt !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  #gradeInputsContainer label {
+    display: block !important;
+    font-size: 7.5pt !important;
+    margin-bottom: 0 !important;
+  }
+
+  #gradeInputsContainer input {
+    border: none !important;
+    font-size: 9pt !important;
+    font-weight: bold !important;
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Results text */
+  .grid-cols-2 {
+    display: block !important;
+    margin: 0.25rem 0 !important;
+  }
+
+  .grid-cols-2 > div {
+    display: inline-block !important;
+    margin-right: 1.5rem !important;
+  }
+
+  .text-\[9px\], .text-xs, .text-xl, .text-3xl {
+    font-size: 9pt !important;
+    font-weight: normal !important;
+    color: black !important;
+  }
+
+  #gradeCountDisplay, #averageDisplay {
+    font-size: 10pt !important;
+    font-weight: bold !important;
+  }
+
+  /* Simple Bar Chart */
+  #distributionBar * {
+    display: none !important;
+
+  }
+}
+
+
+

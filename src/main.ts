@@ -32,8 +32,94 @@ const gradeCountDisplay = document.querySelector<HTMLDivElement>('#gradeCountDis
 const averageDisplay = document.querySelector<HTMLDivElement>('#averageDisplay');
 const distributionBar = document.querySelector<HTMLDivElement>('#distributionBar');
 const distributionLegend = document.querySelector<HTMLDivElement>('#distributionLegend');
+const shareButton = document.querySelector<HTMLButtonElement>('#shareButton');
 
 // --- Core Logic ---
+
+/**
+ * Updates URL search parameters based on current state
+ */
+function updateUrlParams(): void {
+  const params = new URLSearchParams();
+  
+  const maxPoints = maxPointsInput?.value || '';
+  if (maxPoints) params.set('m', maxPoints);
+  
+  const rounding = getActiveRounding();
+  if (rounding !== 'down') params.set('r', rounding);
+  
+  const grades = Array.from(gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input') || []);
+  const gradeCounts = grades.map(input => input.value || '0').join(',');
+  if (gradeCounts.split(',').some(c => c !== '0')) {
+    params.set('g', gradeCounts);
+  }
+
+  const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+  window.history.replaceState({}, '', newUrl);
+}
+
+/**
+ * Saves the current application state to localStorage and URL
+ */
+function saveState(): void {
+  const state = {
+    maxPoints: maxPointsInput?.value || '',
+    rounding: getActiveRounding(),
+    grades: Array.from(gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input') || []).reduce((acc, input) => {
+      acc[input.dataset.grade || ''] = input.value;
+      return acc;
+    }, {} as Record<string, string>)
+  };
+  localStorage.setItem('bewertungsrechner_state', JSON.stringify(state));
+  updateUrlParams();
+}
+
+/**
+ * Loads the application state from URL or localStorage
+ */
+function loadState(): void {
+  const urlParams = new URLSearchParams(window.location.search);
+  const saved = localStorage.getItem('bewertungsrechner_state');
+  
+  try {
+    // 1. Priority: URL Parameters
+    if (urlParams.has('m')) {
+      if (maxPointsInput) maxPointsInput.value = urlParams.get('m') || '';
+    } else if (saved) {
+      const state = JSON.parse(saved);
+      if (maxPointsInput && state.maxPoints !== undefined) maxPointsInput.value = state.maxPoints;
+    }
+    
+    if (urlParams.has('r')) {
+      const radio = Array.from(roundingInputs).find(input => input.value === urlParams.get('r'));
+      if (radio) radio.checked = true;
+    } else if (saved) {
+      const state = JSON.parse(saved);
+      if (state.rounding) {
+        const radio = Array.from(roundingInputs).find(input => input.value === state.rounding);
+        if (radio) radio.checked = true;
+      }
+    }
+    
+    if (urlParams.has('g')) {
+      const counts = urlParams.get('g')?.split(',') || [];
+      counts.forEach((count, index) => {
+        const input = gradeInputsContainer?.querySelector<HTMLInputElement>(`input[data-grade="${index + 1}"]`);
+        if (input) input.value = count === '0' ? '' : count;
+      });
+    } else if (saved) {
+      const state = JSON.parse(saved);
+      if (state.grades && gradeInputsContainer) {
+        Object.entries(state.grades).forEach(([grade, count]) => {
+          const input = gradeInputsContainer.querySelector<HTMLInputElement>(`input[data-grade="${grade}"]`);
+          if (input) input.value = count as string;
+        });
+      }
+    }
+  } catch (e) {
+    console.error("Failed to load state:", e);
+  }
+}
 
 /**
  * Initializes the grade average calculator section with traditional grades (1-6)
@@ -59,7 +145,10 @@ function initGradeCalculator(): void {
     input.dataset.grade = i.toString();
     input.className = "w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all";
     
-    input.addEventListener('input', calculateAverage);
+    input.addEventListener('input', () => {
+      calculateAverage();
+      saveState();
+    });
     
     wrapper.appendChild(label);
     wrapper.appendChild(input);
@@ -246,7 +335,10 @@ function updateTable(): void {
 
 // --- Event Handlers ---
 
-maxPointsInput?.addEventListener('input', updateTable);
+maxPointsInput?.addEventListener('input', () => {
+  updateTable();
+  saveState();
+});
 
 /**
  * Handles keyboard "Enter" or "Done" to blur the input and hide mobile keyboard
@@ -257,16 +349,51 @@ maxPointsInput?.addEventListener('keydown', (e) => {
   }
 });
 
-roundingInputs.forEach(input => input.addEventListener('change', updateTable));
+roundingInputs.forEach(input => input.addEventListener('change', () => {
+  updateTable();
+  saveState();
+}));
+
+shareButton?.addEventListener('click', async () => {
+  const url = window.location.href;
+  
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'MSS Notenrechner',
+        text: 'Meine Notenberechnung',
+        url: url
+      });
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  } else {
+    // Fallback: Copy to clipboard
+    try {
+      await navigator.clipboard.writeText(url);
+      const originalText = shareButton.innerHTML;
+      shareButton.innerHTML = 'Kopiert!';
+      setTimeout(() => {
+        shareButton.innerHTML = originalText;
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  }
+});
 
 // --- Lifecycle ---
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    updateTable();
     initGradeCalculator();
+    loadState();
+    updateTable();
+    calculateAverage();
   });
 } else {
-  updateTable();
   initGradeCalculator();
+  loadState();
+  updateTable();
+  calculateAverage();
 }
