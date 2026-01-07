@@ -13,6 +13,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="/manifest.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" fetchpriority="high">
@@ -25,13 +27,19 @@
     <div id="app" class="min-h-screen bg-slate-50 dark:bg-[#050505]">
       <main class="max-w-2xl mx-auto px-4 sm:px-6 pb-12">
         
+        <!-- Print-only Title -->
+        <div class="hidden print:block print:mb-8 border-b-2 border-black pb-2">
+          <h1 class="text-2xl font-black text-black">MSS PUNKTESPIEGEL</h1>
+          <p class="text-xs font-bold text-black uppercase tracking-widest mt-1">Erstellt mit MSS-Notenrechner.de</p>
+        </div>
+
         <!-- Sticky Header Container -->
         <div class="sticky top-0 z-20 pt-6 pb-4 bg-slate-50/80 dark:bg-[#050505]/80 backdrop-blur-lg border-b border-slate-200 dark:border-neutral-900 mb-6">
           <div class="flex flex-col space-y-6">
             
             <!-- Input Section -->
             <div class="relative max-w-md mx-auto w-full group" >
-              <label class="block no-print text-[10px] font-bold text-slate-600 dark:text-neutral-400 mb-2 uppercase tracking-[0.2em] text-center">
+              <label class="block text-[10px] font-bold text-slate-600 dark:text-neutral-400 mb-2 uppercase tracking-[0.2em] text-center print:text-left print:mb-0">
                 Maximale Punktzahl
               </label>
               <div class="relative">
@@ -40,7 +48,7 @@
                   type="number" 
                   inputmode="decimal"
                   placeholder="0" 
-                  class="w-full no-print rounded-3xl border-2 border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-4 sm:p-5 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white text-center placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-teal-500 dark:focus:border-teal-500 focus:outline-none transition-all shadow-sm dark:shadow-inner"
+                  class="w-full rounded-3xl border-2 border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-4 sm:p-5 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white text-center placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-teal-500 dark:focus:border-teal-500 focus:outline-none transition-all shadow-sm dark:shadow-inner print:text-left print:p-0 print:text-xl print:border-none print:shadow-none"
                 />
                 <button id="clearMaxPoints" aria-label="Eingabe löschen" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors cursor-pointer no-print p-2 rounded-full hover:bg-slate-100 dark:hover:bg-neutral-800 hidden">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
@@ -151,22 +159,22 @@
                 <td class="p-4 sm:p-5 text-right font-black font-mono text-xl text-slate-300 dark:text-neutral-700">—</td>
               </tr>
               <tr class="border-t border-slate-100 dark:border-neutral-900/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl text-red-600 dark:text-red-500/60">03</td>
+                <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl text-red-600 dark:text-red-500">03</td>
                 <td class="p-4 sm:p-5 text-center leading-tight"><div class="flex flex-col items-center justify-center min-h-[52px]"><div class="font-bold text-xs text-slate-600 dark:text-neutral-300">34%</div><div class="w-12 h-1 mt-1.5 no-print"></div><div class="text-[8px] mt-1 opacity-0">IST: 0.0%</div></div></td>
                 <td class="p-4 sm:p-5 text-right font-black font-mono text-xl text-slate-300 dark:text-neutral-700">—</td>
               </tr>
               <tr class="border-t border-slate-100 dark:border-neutral-900/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl text-red-600 dark:text-red-500/60">02</td>
+                <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl text-red-600 dark:text-red-500">02</td>
                 <td class="p-4 sm:p-5 text-center leading-tight"><div class="flex flex-col items-center justify-center min-h-[52px]"><div class="font-bold text-xs text-slate-600 dark:text-neutral-300">27%</div><div class="w-12 h-1 mt-1.5 no-print"></div><div class="text-[8px] mt-1 opacity-0">IST: 0.0%</div></div></td>
                 <td class="p-4 sm:p-5 text-right font-black font-mono text-xl text-slate-300 dark:text-neutral-700">—</td>
               </tr>
               <tr class="border-t border-slate-100 dark:border-neutral-900/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl text-red-600 dark:text-red-500/60">01</td>
+                <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl text-red-600 dark:text-red-500">01</td>
                 <td class="p-4 sm:p-5 text-center leading-tight"><div class="flex flex-col items-center justify-center min-h-[52px]"><div class="font-bold text-xs text-slate-600 dark:text-neutral-300">20%</div><div class="w-12 h-1 mt-1.5 no-print"></div><div class="text-[8px] mt-1 opacity-0">IST: 0.0%</div></div></td>
                 <td class="p-4 sm:p-5 text-right font-black font-mono text-xl text-slate-300 dark:text-neutral-700">—</td>
               </tr>
               <tr class="border-t border-slate-100 dark:border-neutral-900/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
-                <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl text-red-600 dark:text-red-500/60">00</td>
+                <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl text-red-600 dark:text-red-500">00</td>
                 <td class="p-4 sm:p-5 text-center leading-tight"><div class="flex flex-col items-center justify-center min-h-[52px]"><div class="font-bold text-xs text-slate-600 dark:text-neutral-300">0%</div><div class="w-12 h-1 mt-1.5 no-print"></div><div class="text-[8px] mt-1 opacity-0">IST: 0.0%</div></div></td>
                 <td class="p-4 sm:p-5 text-right font-black font-mono text-xl text-slate-300 dark:text-neutral-700">—</td>
               </tr>
@@ -223,7 +231,7 @@
               </div>
             </div>
             
-            <div class="space-y-4 relative z-10 no-print">
+            <div class="space-y-4 relative z-10 print:mt-8">
               <div class="text-[9px] font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-widest mb-2 text-center">Verteilung</div>
               <div id="distributionBar" class="flex items-end justify-between h-32 w-full gap-1 px-2">
                 <!-- Columns added by JS -->

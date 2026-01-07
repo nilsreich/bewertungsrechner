@@ -51,22 +51,20 @@ tr {
 @media print {
   @page {
     size: A4;
-    margin: 1cm;
+    margin: 2.5cm;
   }
 
   * {
-    background: transparent !important;
-    color: black !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    filter: none !important;
-    transition: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: transparent !important;
   }
 
   body {
     background: white !important;
-    font-size: 8pt !important;
-    line-height: 1.1;
+    font-size: 10pt !important;
+    line-height: normal;
+    color: black !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -75,168 +73,136 @@ tr {
   [name="rounding"], 
   .segment-button, 
   .segment-button + label,
-  .bg-slate-200.dark\:bg-neutral-900\/80,
-  #distributionLegend,
   #shareButton,
+  .sticky,
+  button,
+  footer,
+  .bg-slate-50\/80,
   script { 
     display: none !important;
   }
 
-  #app, .max-w-2xl, div {
+  #app, .max-w-2xl {
     max-width: 100% !important;
-    padding: 0 !important;
+    width: 100% !important;
     margin: 0 !important;
-    border: none !important;
-    border-radius: 0 !important;
-    position: static !important;
+    padding: 0 !important;
     display: block !important;
   }
 
-  /* Compact primitive headers */
-  label[for="maxPoints"], .tracking-\[0\.2em\], h2 {
-    font-size: 8pt !important;
-    font-weight: bold !important;
-    text-transform: none !important;
-    margin: 0.1rem 0 !important;
-    text-align: left !important;
-    letter-spacing: normal !important;
+  /* Typography */
+  h1, h2, h3 {
+    color: black !important;
+    margin: 0.5rem 0 !important;
   }
 
-  #maxPoints {
-    border: none !important;
-    border-bottom: 0.5pt solid black !important;
-    font-size: 9pt !important;
-    font-weight: bold !important;
-    width: 40px !important;
-    padding: 0 !important;
-    margin: 0 0 0.1rem 0 !important;
-  }
-
-  /* Professional "Booktabs" Style Table */
+  /* Professional Table Structure */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    border-top: 2pt solid black !important;
-    border-bottom: 2pt solid black !important;
-    margin: 1.5rem 0 !important;
-    font-variant-numeric: tabular-nums;
-  }
-
-  th, td {
-    border: none !important;
-    padding: 6pt 8pt !important;
-    text-align: left !important;
-    font-size: 9pt !important;
-    line-height: 1.4 !important;
+    margin: 1rem 0 2rem 0 !important;
+    border-top: 2.5pt solid black !important;
+    border-bottom: 2.5pt solid black !important;
   }
 
   th {
-    font-weight: 700 !important;
-    border-bottom: 0.75pt solid black !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.1em !important;
-    padding-bottom: 4pt !important;
-  }
-
-  /* Remove zebra striping, use white space for elegance */
-  tbody tr:nth-child(even) {
-    background-color: transparent !important;
-  }
-
-  /* Optional: Very subtle horizontal lines every few rows for long tables */
-  tbody tr {
-    border-bottom: 0.25pt solid #eee !important;
-  }
-
-  tbody tr:last-child {
-    border-bottom: none !important;
-  }
-
-  /* Refined Grade Average section */
-  #gradeInputsContainer {
-    display: table !important;
-    border-collapse: collapse !important;
-    width: 100% !important;
-    margin-top: 1.5rem !important;
-    border-top: 1.5pt solid black !important;
-    border-bottom: 1.5pt solid black !important;
-  }
-
-  #gradeInputsContainer > div {
-    display: table-cell !important;
-    border: 0.5pt solid #ccc !important;
-    border-top: none !important;
-    border-bottom: none !important;
-    padding: 6pt 4pt !important;
-  }
-
-  #gradeInputsContainer > div:first-child { border-left: none !important; }
-  #gradeInputsContainer > div:last-child { border-right: none !important; }
-
-  #gradeInputsContainer label {
-    font-size: 6.5pt !important;
-    margin: 0 !important;
-  }
-
-  #gradeInputsContainer input {
-    border: none !important;
+    border-bottom: 1pt solid black !important;
+    text-align: left !important;
+    padding: 10pt 6pt !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
     font-size: 8pt !important;
-    font-weight: bold !important;
-    width: 100% !important;
-    text-align: center !important;
+    letter-spacing: 0.05em;
   }
 
-  /* Results text */
+  td {
+    border-bottom: 0.25pt solid #ddd !important;
+    padding: 8pt 6pt !important;
+    font-size: 10pt !important;
+    vertical-align: middle !important;
+  }
+
+  tr:last-child td {
+    border-bottom: none !important;
+  }
+
+  /* Alignment for table columns */
+  td:first-child, th:first-child { text-align: left !important; width: 20%; }
+  td:nth-child(2), th:nth-child(2) { text-align: center !important; }
+  td:last-child, th:last-child { text-align: right !important; width: 25%; }
+
+  /* Summary Section (Average & Count) */
   .grid-cols-2 {
-    display: block !important;
-    margin: 0.1rem 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    border: 1pt solid black !important;
+    padding: 1rem !important;
+    margin: 1rem 0 !important;
     page-break-inside: avoid;
-  }
-
-  .grid-cols-2 div, .text-\[9px\], .text-xs, .text-xl, .text-3xl {
-    font-size: 8pt !important;
-    display: inline !important;
-    margin-right: 1rem !important;
-    color: black !important;
   }
 
   #gradeCountDisplay, #averageDisplay {
-    font-size: 9pt !important;
-    font-weight: bold !important;
+    font-size: 20pt !important;
+    font-weight: 900 !important;
+    color: black !important;
   }
 
-  /* Forced One-Page Bar Chart */
+  /* Distribution Bar Styling */
   #distributionBar {
+    height: 1.2in !important;
     display: flex !important;
     align-items: flex-end !important;
-    justify-content: space-around !important;
-    height: 0.5in !important;
-    border-bottom: 1pt solid black !important;
-    margin: 0.5rem 0 0 !important;
-    padding: 0 5pt !important;
-    page-break-inside: avoid;
+    justify-content: space-between !important;
+    border-bottom: 1.5pt solid black !important;
+    padding: 0 0.5rem !important;
+    margin: 2rem 0 1rem 0 !important;
+    gap: 8pt !important;
   }
 
-  #distributionBar > div {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-end !important;
-    align-items: center !important;
-    flex: 1 !important;
-    height: 100% !important;
+  .dist-bar {
+    background: #333 !important; /* Fixed dark grey for bars */
+    width: 100% !important;
+    border: 1px solid black !important;
+    border-bottom: none !important;
   }
 
-  #distributionBar > div > div:nth-child(2) {
-    background: black !important;
-    border: 0.5pt solid black !important;
-    width: 50% !important;
-  }
-
-  #distributionBar > div > div:first-child,
-  #distributionBar > div > div:last-child {
-    font-size: 6pt !important;
+  .dist-count {
+    opacity: 1 !important;
+    font-size: 7.5pt !important;
     font-weight: bold !important;
-    display: block !important;
+    margin-bottom: 2pt !important;
+    text-align: center;
+  }
+
+  .dist-grade {
+    font-size: 8pt !important;
+    font-weight: 800 !important;
+    margin-top: 4pt !important;
+    text-align: center;
+  }
+
+  /* Legend Item formatting */
+  #distributionLegend {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 1.5rem !important;
+    margin-top: 0.5rem !important;
+    border-top: 0.5pt solid #eee;
+    padding-top: 1rem;
+  }
+
+  #distributionLegend span {
+    border: 1pt solid black !important;
+    width: 8pt !important;
+    height: 8pt !important;
+  }
+
+  /* Keep the Note label small in distribution */
+  #distributionLegend div {
+    font-size: 8pt !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
   }
 }
 

@@ -195,20 +195,26 @@ function calculateAverage(): void {
     colWrapper.className = "flex-1 flex flex-col items-center justify-end h-full group";
     
     const countLabel = document.createElement('div');
-    countLabel.className = "text-[10px] font-black mb-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 dark:text-neutral-400";
+    countLabel.className = "dist-count text-[10px] font-black mb-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 dark:text-neutral-400";
     countLabel.innerText = count > 0 ? count.toString() : '';
 
+    // Fixed: Use a dedicated container for the bar to prevent labels from being pushed out
+    const barContainer = document.createElement('div');
+    barContainer.className = "dist-bar-container w-full flex-1 flex flex-col justify-end min-h-0";
+
     const column = document.createElement('div');
-    column.className = `${colors[Number(grade)]} w-full rounded-t-lg transition-all duration-700 ease-out`;
-    column.style.height = count > 0 ? `${Math.max(percentageOfMax, 5)}%` : '2px';
+    column.className = `dist-bar ${colors[Number(grade)]} w-full rounded-t-lg transition-all duration-700 ease-out`;
+    // Improved scaling: count > 0 is always at least 4px and taller than 0-count (2px)
+    column.style.height = count > 0 ? `max(4px, ${percentageOfMax}%)` : '2px';
     if (count === 0) column.classList.add('opacity-10');
 
     const gradeLabel = document.createElement('div');
-    gradeLabel.className = "text-[9px] font-bold mt-2 text-slate-500 dark:text-neutral-400";
+    gradeLabel.className = "dist-grade text-[9px] font-bold mt-2 text-slate-500 dark:text-neutral-400";
     gradeLabel.innerText = grade;
 
+    barContainer.appendChild(column);
     colWrapper.appendChild(countLabel);
-    colWrapper.appendChild(column);
+    colWrapper.appendChild(barContainer);
     colWrapper.appendChild(gradeLabel);
     distributionBar.appendChild(colWrapper);
 
