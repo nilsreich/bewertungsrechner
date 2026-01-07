@@ -182,48 +182,37 @@ function calculateAverage(): void {
   averageDisplay.innerText = average.toFixed(2);
 
   // Render Graphical Distribution
-  distributionBar.replaceChildren();
   distributionLegend.replaceChildren();
 
   const maxCount = Math.max(...Object.values(distribution), 1);
+  const chartWrappers = distributionBar.querySelectorAll('.group');
 
-  Object.entries(distribution).forEach(([grade, count]) => {
-    // Column/Bar segment
+  Object.entries(distribution).forEach(([gradeStr, count], index) => {
+    const grade = Number(gradeStr);
     const percentageOfMax = (count / maxCount) * 100;
+    const wrapper = chartWrappers[index] as HTMLElement;
     
-    const colWrapper = document.createElement('div');
-    colWrapper.className = "flex-1 flex flex-col items-center justify-end h-full group";
-    
-    const countLabel = document.createElement('div');
-    countLabel.className = "dist-count text-[10px] font-black mb-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 dark:text-neutral-400";
-    countLabel.innerText = count > 0 ? count.toString() : '';
+    if (wrapper) {
+      const countLabel = wrapper.querySelector('.dist-count') as HTMLElement;
+      const bar = wrapper.querySelector('.dist-bar') as HTMLElement;
 
-    // Fixed: Use a dedicated container for the bar to prevent labels from being pushed out
-    const barContainer = document.createElement('div');
-    barContainer.className = "dist-bar-container w-full flex-1 flex flex-col justify-end min-h-0";
+      if (countLabel) {
+        countLabel.innerText = count > 0 ? count.toString() : '';
+      }
 
-    const column = document.createElement('div');
-    column.className = `dist-bar ${colors[Number(grade)]} w-full rounded-t-lg transition-all duration-700 ease-out`;
-    // Improved scaling: count > 0 is always at least 4px and taller than 0-count (2px)
-    column.style.height = count > 0 ? `max(4px, ${percentageOfMax}%)` : '2px';
-    if (count === 0) column.classList.add('opacity-10');
-
-    const gradeLabel = document.createElement('div');
-    gradeLabel.className = "dist-grade text-[9px] font-bold mt-2 text-slate-500 dark:text-neutral-400";
-    gradeLabel.innerText = grade;
-
-    barContainer.appendChild(column);
-    colWrapper.appendChild(countLabel);
-    colWrapper.appendChild(barContainer);
-    colWrapper.appendChild(gradeLabel);
-    distributionBar.appendChild(colWrapper);
+      if (bar) {
+        // Higher specific animation: update height
+        bar.style.height = count > 0 ? `max(4px, ${percentageOfMax}%)` : '2px';
+        bar.classList.toggle('opacity-10', count === 0);
+      }
+    }
 
     if (count > 0) {
       // Legend item
       const legendItem = document.createElement('div');
       legendItem.className = "flex items-center space-x-1.5";
       legendItem.innerHTML = `
-        <span class="w-2 h-2 rounded-full ${colors[Number(grade)]}"></span>
+        <span class="w-2 h-2 rounded-full ${colors[grade]}"></span>
         <span>Note ${grade}: ${count}</span>
       `;
       distributionLegend.appendChild(legendItem);
@@ -297,7 +286,7 @@ function updateTable(): void {
       if (max > 0) rowBg = "bg-teal-500/[0.03]";
     } else if (entry.mss < 5) {
       // Low performance (0-4 MSS) - Red
-      mssColor = "text-red-600 dark:text-red-500/60";
+      mssColor = "text-red-600 dark:text-red-500";
       if (max > 0) rowBg = "bg-red-500/[0.03]";
     }
 
@@ -306,12 +295,8 @@ function updateTable(): void {
       <div class="flex flex-col items-center justify-center min-h-[52px]">
         <div class="font-bold text-xs text-slate-600 dark:text-neutral-300">${entry.pct}%</div>
         ${max > 0 ? `
-          <div class="w-12 h-1 bg-slate-100 dark:bg-neutral-800 rounded-full mt-1.5 overflow-hidden no-print">
-            <div class="h-full bg-teal-500/50" style="width: ${entry.pct}%"></div>
-          </div>
           <div class="text-[8px] text-slate-500 dark:text-neutral-400 font-bold tracking-tight mt-1 uppercase">IST: ${effectivePct.toFixed(1)}%</div>
         ` : `
-          <div class="w-12 h-1 mt-1.5 no-print"></div>
           <div class="text-[8px] mt-1 opacity-0">IST: 0.0%</div>
         `}
       </div>

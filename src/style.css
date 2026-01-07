@@ -18,6 +18,45 @@ body {
   margin: 0;
 }
 
+/* Custom Subtle Scrollbar */
+@supports (scrollbar-width: thin) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.85 0.01 220) transparent;
+  }
+  
+  .dark * {
+    scrollbar-color: oklch(0.25 0.01 220) transparent;
+  }
+}
+
+/* Webkit Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.85 0.01 220);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.75 0.02 220);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.25 0.01 220);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.35 0.02 220);
+}
+
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -26,7 +65,7 @@ input::-webkit-inner-spin-button {
 
 /* Custom Segmented Control Styling */
 .segment-button:checked + label {
-  background-color: #0d9488;
+  background-color: oklch(51.1% 0.096 186.391);
   color: white !important;
   box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
 }
@@ -127,9 +166,10 @@ tr {
   }
 
   /* Alignment for table columns */
-  td:first-child, th:first-child { text-align: left !important; width: 20%; }
+  td, th { width: 33.33% !important; }
+  td:first-child, th:first-child { text-align: left !important; }
   td:nth-child(2), th:nth-child(2) { text-align: center !important; }
-  td:last-child, th:last-child { text-align: right !important; width: 25%; }
+  td:last-child, th:last-child { text-align: right !important; }
 
   /* Summary Section (Average & Count) */
   .grid-cols-2 {
