@@ -36,7 +36,7 @@ input::-webkit-inner-spin-button {
 @media print {
   @page {
     size: A4;
-    margin: 2.5cm;
+    margin: 1cm;
   }
 
   * {
@@ -50,8 +50,10 @@ input::-webkit-inner-spin-button {
 
   body {
     background: white !important;
-    font-size: 9pt !important;
-    line-height: 1.2;
+    font-size: 8pt !important;
+    line-height: 1.1;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .no-print, 
@@ -60,8 +62,8 @@ input::-webkit-inner-spin-button {
   .segment-button + label,
   .bg-slate-200.dark\:bg-neutral-900\/80,
   #distributionLegend,
-  script,
-  #print-button-container { 
+  #shareButton,
+  script { 
     display: none !important;
   }
 
@@ -75,81 +77,95 @@ input::-webkit-inner-spin-button {
     display: block !important;
   }
 
-  .sticky {
-    position: static !important;
-    margin-bottom: 0.5rem !important;
-  }
-
-  /* Primitive Title/Header */
+  /* Compact primitive headers */
   label[for="maxPoints"], .tracking-\[0\.2em\], h2 {
-    font-size: 9pt !important;
+    font-size: 8pt !important;
     font-weight: bold !important;
     text-transform: none !important;
-    margin: 0.5rem 0 0.1rem 0 !important;
+    margin: 0.1rem 0 !important;
     text-align: left !important;
     letter-spacing: normal !important;
   }
 
   #maxPoints {
     border: none !important;
-    border-bottom: 1pt solid black !important;
-    font-size: 11pt !important;
+    border-bottom: 0.5pt solid black !important;
+    font-size: 9pt !important;
     font-weight: bold !important;
-    width: 60px !important;
+    width: 40px !important;
     padding: 0 !important;
-    margin-bottom: 0.5rem !important;
-    text-align: left !important;
+    margin: 0 0 0.1rem 0 !important;
   }
 
-  /* Primitive Table */
+  /* Professional "Booktabs" Style Table */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
-    border: 0.5pt solid black !important;
-    margin: 0.5rem 0 !important;
-    table-layout: auto !important;
+    border-top: 2pt solid black !important;
+    border-bottom: 2pt solid black !important;
+    margin: 1.5rem 0 !important;
+    font-variant-numeric: tabular-nums;
   }
 
   th, td {
-    border: 0.5pt solid black !important;
-    padding: 2pt 5pt !important;
+    border: none !important;
+    padding: 6pt 8pt !important;
     text-align: left !important;
-    font-size: 8.5pt !important;
+    font-size: 9pt !important;
+    line-height: 1.4 !important;
   }
 
   th {
-    font-weight: bold !important;
-    background: #eee !important;
+    font-weight: 700 !important;
+    border-bottom: 0.75pt solid black !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+    padding-bottom: 4pt !important;
   }
 
-  .text-right { text-align: right !important; }
-  .text-center { text-align: center !important; }
+  /* Remove zebra striping, use white space for elegance */
+  tbody tr:nth-child(even) {
+    background-color: transparent !important;
+  }
 
-  /* Grade Average primitive rendering */
+  /* Optional: Very subtle horizontal lines every few rows for long tables */
+  tbody tr {
+    border-bottom: 0.25pt solid #eee !important;
+  }
+
+  tbody tr:last-child {
+    border-bottom: none !important;
+  }
+
+  /* Refined Grade Average section */
   #gradeInputsContainer {
     display: table !important;
+    border-collapse: collapse !important;
     width: 100% !important;
-    margin-bottom: 0.5rem !important;
-    border: 0.5pt solid black !important;
+    margin-top: 1.5rem !important;
+    border-top: 1.5pt solid black !important;
+    border-bottom: 1.5pt solid black !important;
   }
 
   #gradeInputsContainer > div {
     display: table-cell !important;
-    border: 0.5pt solid black !important;
-    padding: 1pt !important;
-    text-align: center !important;
-    vertical-align: middle !important;
+    border: 0.5pt solid #ccc !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    padding: 6pt 4pt !important;
   }
 
+  #gradeInputsContainer > div:first-child { border-left: none !important; }
+  #gradeInputsContainer > div:last-child { border-right: none !important; }
+
   #gradeInputsContainer label {
-    display: block !important;
-    font-size: 7.5pt !important;
-    margin-bottom: 0 !important;
+    font-size: 6.5pt !important;
+    margin: 0 !important;
   }
 
   #gradeInputsContainer input {
     border: none !important;
-    font-size: 9pt !important;
+    font-size: 8pt !important;
     font-weight: bold !important;
     width: 100% !important;
     text-align: center !important;
@@ -158,31 +174,57 @@ input::-webkit-inner-spin-button {
   /* Results text */
   .grid-cols-2 {
     display: block !important;
-    margin: 0.25rem 0 !important;
+    margin: 0.1rem 0 !important;
+    page-break-inside: avoid;
   }
 
-  .grid-cols-2 > div {
-    display: inline-block !important;
-    margin-right: 1.5rem !important;
-  }
-
-  .text-\[9px\], .text-xs, .text-xl, .text-3xl {
-    font-size: 9pt !important;
-    font-weight: normal !important;
+  .grid-cols-2 div, .text-\[9px\], .text-xs, .text-xl, .text-3xl {
+    font-size: 8pt !important;
+    display: inline !important;
+    margin-right: 1rem !important;
     color: black !important;
   }
 
   #gradeCountDisplay, #averageDisplay {
-    font-size: 10pt !important;
+    font-size: 9pt !important;
     font-weight: bold !important;
   }
 
-  /* Simple Bar Chart */
-  #distributionBar * {
-    display: none !important;
+  /* Forced One-Page Bar Chart */
+  #distributionBar {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: space-around !important;
+    height: 0.5in !important;
+    border-bottom: 1pt solid black !important;
+    margin: 0.5rem 0 0 !important;
+    padding: 0 5pt !important;
+    page-break-inside: avoid;
+  }
 
+  #distributionBar > div {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    flex: 1 !important;
+    height: 100% !important;
+  }
+
+  #distributionBar > div > div:nth-child(2) {
+    background: black !important;
+    border: 0.5pt solid black !important;
+    width: 50% !important;
+  }
+
+  #distributionBar > div > div:first-child,
+  #distributionBar > div > div:last-child {
+    font-size: 6pt !important;
+    font-weight: bold !important;
+    display: block !important;
   }
 }
+
 
 
 
