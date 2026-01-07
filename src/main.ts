@@ -127,6 +127,16 @@ function updateTable(): void {
 // --- Event Handlers ---
 
 maxPointsInput?.addEventListener('input', updateTable);
+
+/**
+ * Handles keyboard "Enter" or "Done" to blur the input and hide mobile keyboard
+ */
+maxPointsInput?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    maxPointsInput.blur();
+  }
+});
+
 roundingInputs.forEach(input => input.addEventListener('change', updateTable));
 
 // --- Lifecycle ---

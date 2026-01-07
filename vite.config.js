@@ -12,7 +12,8 @@ export default defineConfig({
         name: 'MSS Notenrechner',
         short_name: 'Notenrechner',
         description: 'Moderner Bewertungsrechner für das MSS-Punktesystem',
-        theme_color: '#0f172a',
+        theme_color: '#f8fafc',
+        background_color: '#050505',
         icons: [
           {
             src: 'pwa-192x192.png',
