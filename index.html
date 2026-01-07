@@ -68,6 +68,38 @@
           </table>
         </div>
 
+        <!-- Grade Average Calculator Section -->
+        <div class="mt-16 pt-12 border-t border-slate-200 dark:border-neutral-900">
+          <h2 class="text-center text-[10px] font-bold text-slate-500 dark:text-neutral-500 uppercase tracking-[0.2em] mb-8">Notenschnitt (MSS)</h2>
+          
+          <div class="grid grid-cols-6 sm:grid-cols-6 gap-2 mb-8" id="gradeInputsContainer">
+            <!-- Will be populated by JS -->
+          </div>
+
+          <div class="bg-white dark:bg-neutral-900/40 rounded-3xl p-6 border border-slate-200 dark:border-neutral-800 shadow-xl overflow-hidden relative">
+            <div class="grid grid-cols-2 gap-4 text-center mb-10 relative z-10">
+              <div>
+                <div class="text-[9px] font-bold text-slate-400 dark:text-neutral-500 uppercase tracking-widest mb-1">Anzahl Noten</div>
+                <div id="gradeCountDisplay" class="text-3xl font-black text-slate-900 dark:text-white">0</div>
+              </div>
+              <div>
+                <div class="text-[9px] font-bold text-slate-400 dark:text-neutral-500 uppercase tracking-widest mb-1">Durchschnitt</div>
+                <div id="averageDisplay" class="text-3xl font-black text-teal-600 dark:text-teal-400">0.00</div>
+              </div>
+            </div>
+            
+            <div class="space-y-4 relative z-10">
+              <div class="text-[9px] font-bold text-slate-400 dark:text-neutral-500 uppercase tracking-widest mb-2 text-center">Verteilung</div>
+              <div id="distributionBar" class="flex items-end justify-between h-32 w-full gap-1 px-2">
+                <!-- Columns added by JS -->
+              </div>
+              <div id="distributionLegend" class="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4 text-[9px] font-bold uppercase text-slate-500">
+                <!-- Legend items added by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
     <script type="module" src="/src/main.ts"></script>

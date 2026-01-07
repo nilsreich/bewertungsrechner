@@ -27,6 +27,126 @@ const MSS_SCALE: ScaleEntry[] = [
 const maxPointsInput = document.querySelector<HTMLInputElement>('#maxPoints');
 const tableBody = document.querySelector<HTMLTableSectionElement>('#tableBody');
 const roundingInputs = document.querySelectorAll<HTMLInputElement>('input[name="rounding"]');
+const gradeInputsContainer = document.querySelector<HTMLDivElement>('#gradeInputsContainer');
+const gradeCountDisplay = document.querySelector<HTMLDivElement>('#gradeCountDisplay');
+const averageDisplay = document.querySelector<HTMLDivElement>('#averageDisplay');
+const distributionBar = document.querySelector<HTMLDivElement>('#distributionBar');
+const distributionLegend = document.querySelector<HTMLDivElement>('#distributionLegend');
+
+// --- Core Logic ---
+
+/**
+ * Initializes the grade average calculator section with traditional grades (1-6)
+ */
+function initGradeCalculator(): void {
+  if (!gradeInputsContainer) return;
+
+  // Create inputs for grades 1 to 6
+  for (let i = 1; i <= 6; i++) {
+    const wrapper = document.createElement('div');
+    wrapper.className = "flex flex-col items-center space-y-1";
+    
+    // Label for the Grade
+    const label = document.createElement('label');
+    label.className = "text-[9px] font-bold text-slate-400 dark:text-neutral-600 uppercase";
+    label.innerText = `Note ${i}`;
+    
+    // Input for the count of these grades
+    const input = document.createElement('input');
+    input.type = "number";
+    input.min = "0";
+    input.placeholder = "0";
+    input.dataset.grade = i.toString();
+    input.className = "w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all";
+    
+    input.addEventListener('input', calculateAverage);
+    
+    wrapper.appendChild(label);
+    wrapper.appendChild(input);
+    gradeInputsContainer.appendChild(wrapper);
+  }
+}
+
+/**
+ * Calculates and renders the average and distribution for traditional grades
+ */
+function calculateAverage(): void {
+  const inputs = gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input');
+  if (!inputs || !gradeCountDisplay || !averageDisplay || !distributionBar || !distributionLegend) return;
+
+  let totalGradeValue = 0;
+  let totalGrades = 0;
+  
+  const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+  const colors: Record<number, string> = {
+    1: 'bg-teal-500',
+    2: 'bg-emerald-500',
+    3: 'bg-lime-500',
+    4: 'bg-yellow-500',
+    5: 'bg-orange-500',
+    6: 'bg-red-500'
+  };
+
+  inputs.forEach(input => {
+    const count = parseInt(input.value) || 0;
+    const grade = parseInt(input.dataset.grade || '0');
+    
+    if (count > 0) {
+      totalGradeValue += (grade * count);
+      totalGrades += count;
+      distribution[grade] = count;
+    }
+  });
+
+  const average = totalGrades > 0 ? (totalGradeValue / totalGrades) : 0;
+  
+  // Update displays
+  gradeCountDisplay.innerText = totalGrades.toString();
+  averageDisplay.innerText = average.toFixed(2);
+
+  // Render Graphical Distribution
+  distributionBar.replaceChildren();
+  distributionLegend.replaceChildren();
+
+  const maxCount = Math.max(...Object.values(distribution), 1);
+
+  Object.entries(distribution).forEach(([grade, count]) => {
+    // Column/Bar segment
+    const percentageOfMax = (count / maxCount) * 100;
+    
+    const colWrapper = document.createElement('div');
+    colWrapper.className = "flex-1 flex flex-col items-center justify-end h-full group";
+    
+    const countLabel = document.createElement('div');
+    countLabel.className = "text-[10px] font-black mb-1 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 dark:text-neutral-400";
+    countLabel.innerText = count > 0 ? count.toString() : '';
+
+    const column = document.createElement('div');
+    column.className = `${colors[Number(grade)]} w-full rounded-t-lg transition-all duration-700 ease-out`;
+    column.style.height = count > 0 ? `${Math.max(percentageOfMax, 5)}%` : '2px';
+    if (count === 0) column.classList.add('opacity-10');
+
+    const gradeLabel = document.createElement('div');
+    gradeLabel.className = "text-[9px] font-bold mt-2 text-slate-400 dark:text-neutral-600";
+    gradeLabel.innerText = grade;
+
+    colWrapper.appendChild(countLabel);
+    colWrapper.appendChild(column);
+    colWrapper.appendChild(gradeLabel);
+    distributionBar.appendChild(colWrapper);
+
+    if (count > 0) {
+      // Legend item
+      const legendItem = document.createElement('div');
+      legendItem.className = "flex items-center space-x-1.5";
+      legendItem.innerHTML = `
+        <span class="w-2 h-2 rounded-full ${colors[Number(grade)]}"></span>
+        <span>Note ${grade}: ${count}</span>
+      `;
+      distributionLegend.appendChild(legendItem);
+    }
+  });
+}
 
 // --- Core Logic ---
 
@@ -142,7 +262,11 @@ roundingInputs.forEach(input => input.addEventListener('change', updateTable));
 // --- Lifecycle ---
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', updateTable);
+  document.addEventListener('DOMContentLoaded', () => {
+    updateTable();
+    initGradeCalculator();
+  });
 } else {
   updateTable();
+  initGradeCalculator();
 }
