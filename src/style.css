@@ -4,11 +4,20 @@
 
 :root {
   color-scheme: light dark;
+  background-color: #f8fafc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    background-color: #050505;
+  }
 }
 
 body { 
   font-family: 'Inter', sans-serif; 
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  margin: 0;
 }
 
 input::-webkit-outer-spin-button,
