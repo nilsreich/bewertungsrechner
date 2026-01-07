@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     VitePWA({
+      injectRegister: false,
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-managed-icon.svg'],
       manifest: {

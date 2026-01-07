@@ -132,38 +132,16 @@ function loadState(): void {
 }
 
 /**
- * Initializes the grade average calculator section with traditional grades (1-6)
+ * Initializes the grade average calculator section by attaching event listeners to pre-rendered inputs
  */
 function initGradeCalculator(): void {
-  if (!gradeInputsContainer) return;
-
-  // Create inputs for grades 1 to 6
-  for (let i = 1; i <= 6; i++) {
-    const wrapper = document.createElement('div');
-    wrapper.className = "flex flex-col items-center space-y-1";
-    
-    // Label for the Grade
-    const label = document.createElement('label');
-    label.className = "text-[9px] font-bold text-slate-400 dark:text-neutral-600 uppercase";
-    label.innerText = `Note ${i}`;
-    
-    // Input for the count of these grades
-    const input = document.createElement('input');
-    input.type = "number";
-    input.min = "0";
-    input.placeholder = "0";
-    input.dataset.grade = i.toString();
-    input.className = "w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all";
-    
+  const inputs = gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input');
+  inputs?.forEach(input => {
     input.addEventListener('input', () => {
       calculateAverage();
       saveState();
     });
-    
-    wrapper.appendChild(label);
-    wrapper.appendChild(input);
-    gradeInputsContainer.appendChild(wrapper);
-  }
+  });
 }
 
 /**
@@ -226,7 +204,7 @@ function calculateAverage(): void {
     if (count === 0) column.classList.add('opacity-10');
 
     const gradeLabel = document.createElement('div');
-    gradeLabel.className = "text-[9px] font-bold mt-2 text-slate-400 dark:text-neutral-600";
+    gradeLabel.className = "text-[9px] font-bold mt-2 text-slate-500 dark:text-neutral-400";
     gradeLabel.innerText = grade;
 
     colWrapper.appendChild(countLabel);
@@ -303,7 +281,7 @@ function updateTable(): void {
       : 'border-t border-slate-100 dark:border-neutral-900/50';
     
     // Visual encoding for performance brackets
-    let mssColor = "text-slate-400 dark:text-neutral-500";
+    let mssColor = "text-slate-600 dark:text-neutral-400";
     let pointsColor = "text-slate-900 dark:text-white";
     let rowBg = "bg-transparent";
     
@@ -317,16 +295,19 @@ function updateTable(): void {
       if (max > 0) rowBg = "bg-red-500/[0.03]";
     }
 
-    // Percentage display logic (Target vs. Actual)
+    // Percentage display logic (Target vs. Actual) with fixed height to prevent layout shift
     let pctDisplay = `
-      <div class="flex flex-col items-center">
+      <div class="flex flex-col items-center justify-center min-h-[52px]">
         <div class="font-bold text-xs text-slate-600 dark:text-neutral-300">${entry.pct}%</div>
         ${max > 0 ? `
           <div class="w-12 h-1 bg-slate-100 dark:bg-neutral-800 rounded-full mt-1.5 overflow-hidden no-print">
             <div class="h-full bg-teal-500/50" style="width: ${entry.pct}%"></div>
           </div>
-          <div class="text-[8px] text-slate-400 dark:text-neutral-600 font-bold tracking-tight mt-1 uppercase">IST: ${effectivePct.toFixed(1)}%</div>
-        ` : ''}
+          <div class="text-[8px] text-slate-500 dark:text-neutral-400 font-bold tracking-tight mt-1 uppercase">IST: ${effectivePct.toFixed(1)}%</div>
+        ` : `
+          <div class="w-12 h-1 mt-1.5 no-print"></div>
+          <div class="text-[8px] mt-1 opacity-0">IST: 0.0%</div>
+        `}
       </div>
     `;
 
@@ -476,4 +457,17 @@ if (document.readyState === 'loading') {
   loadState();
   updateTable();
   calculateAverage();
+}
+
+// Service Worker Registration (Non-blocking)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(registration => {
+        console.log('SW registered:', registration);
+      })
+      .catch(error => {
+        console.log('SW registration failed:', error);
+      });
+  });
 }
