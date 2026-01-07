@@ -25,6 +25,7 @@ const MSS_SCALE: ScaleEntry[] = [
 // --- DOM References ---
 
 const maxPointsInput = document.querySelector<HTMLInputElement>('#maxPoints');
+const clearMaxPoints = document.querySelector<HTMLButtonElement>('#clearMaxPoints');
 const tableBody = document.querySelector<HTMLTableSectionElement>('#tableBody');
 const roundingInputs = document.querySelectorAll<HTMLInputElement>('input[name="rounding"]');
 const gradeInputsContainer = document.querySelector<HTMLDivElement>('#gradeInputsContainer');
@@ -33,6 +34,9 @@ const averageDisplay = document.querySelector<HTMLDivElement>('#averageDisplay')
 const distributionBar = document.querySelector<HTMLDivElement>('#distributionBar');
 const distributionLegend = document.querySelector<HTMLDivElement>('#distributionLegend');
 const shareButton = document.querySelector<HTMLButtonElement>('#shareButton');
+const copyTableButton = document.querySelector<HTMLButtonElement>('#copyTableButton');
+const resetGradesButton = document.querySelector<HTMLButtonElement>('#resetGradesButton');
+const presetButtons = document.querySelectorAll<HTMLButtonElement>('.preset-btn');
 
 // --- Core Logic ---
 
@@ -84,10 +88,16 @@ function loadState(): void {
   try {
     // 1. Priority: URL Parameters
     if (urlParams.has('m')) {
-      if (maxPointsInput) maxPointsInput.value = urlParams.get('m') || '';
+      if (maxPointsInput) {
+        maxPointsInput.value = urlParams.get('m') || '';
+        if (clearMaxPoints) clearMaxPoints.classList.toggle('hidden', !maxPointsInput.value);
+      }
     } else if (saved) {
       const state = JSON.parse(saved);
-      if (maxPointsInput && state.maxPoints !== undefined) maxPointsInput.value = state.maxPoints;
+      if (maxPointsInput && state.maxPoints !== undefined) {
+        maxPointsInput.value = state.maxPoints;
+        if (clearMaxPoints) clearMaxPoints.classList.toggle('hidden', !maxPointsInput.value);
+      }
     }
     
     if (urlParams.has('r')) {
@@ -308,10 +318,17 @@ function updateTable(): void {
     }
 
     // Percentage display logic (Target vs. Actual)
-    let pctDisplay = `<div class="font-bold text-xs text-slate-600 dark:text-neutral-300">${entry.pct}%</div>`;
-    if (max > 0) {
-      pctDisplay += `<div class="text-[9px] text-slate-400 dark:text-neutral-600 font-bold tracking-tight mt-0.5 uppercase">IST: ${effectivePct.toFixed(1)}%</div>`;
-    }
+    let pctDisplay = `
+      <div class="flex flex-col items-center">
+        <div class="font-bold text-xs text-slate-600 dark:text-neutral-300">${entry.pct}%</div>
+        ${max > 0 ? `
+          <div class="w-12 h-1 bg-slate-100 dark:bg-neutral-800 rounded-full mt-1.5 overflow-hidden no-print">
+            <div class="h-full bg-teal-500/50" style="width: ${entry.pct}%"></div>
+          </div>
+          <div class="text-[8px] text-slate-400 dark:text-neutral-600 font-bold tracking-tight mt-1 uppercase">IST: ${effectivePct.toFixed(1)}%</div>
+        ` : ''}
+      </div>
+    `;
 
     const row = document.createElement('tr');
     row.className = `${borderClass} ${rowBg} hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors`;
@@ -336,8 +353,30 @@ function updateTable(): void {
 // --- Event Handlers ---
 
 maxPointsInput?.addEventListener('input', () => {
+  if (clearMaxPoints) {
+    clearMaxPoints.classList.toggle('hidden', !maxPointsInput.value);
+  }
   updateTable();
   saveState();
+});
+
+presetButtons.forEach(btn => btn.addEventListener('click', () => {
+  if (maxPointsInput) {
+    maxPointsInput.value = btn.dataset.value || '';
+    if (clearMaxPoints) clearMaxPoints.classList.remove('hidden');
+    updateTable();
+    saveState();
+  }
+}));
+
+clearMaxPoints?.addEventListener('click', () => {
+  if (maxPointsInput) {
+    maxPointsInput.value = '';
+    clearMaxPoints.classList.add('hidden');
+    updateTable();
+    saveState();
+    maxPointsInput.focus();
+  }
 });
 
 /**
@@ -380,6 +419,47 @@ shareButton?.addEventListener('click', async () => {
       console.error('Failed to copy:', err);
     }
   }
+});
+
+copyTableButton?.addEventListener('click', async () => {
+  const max = parseFloat(maxPointsInput?.value.replace(',', '.') || '0');
+  if (!max) return;
+
+  const mode = getActiveRounding();
+  let markdown = `MSS Notenrechner | Max: ${max} Punkte | Rundung: ${mode}\n\n`;
+  markdown += `| MSS | Limit | Punkte |\n`;
+  markdown += `| :-- | :---: | -----: |\n`;
+
+  MSS_SCALE.forEach(entry => {
+    const rawPoints = max * (entry.pct / 100);
+    const roundedPoints = calculatePoints(rawPoints, mode);
+    const formattedPoints = roundedPoints.toLocaleString('de-DE', {
+      minimumFractionDigits: (mode === 'half' || mode === 'none') ? (mode === 'none' ? 2 : 1) : 0,
+      maximumFractionDigits: 2
+    });
+    markdown += `| ${entry.mss.toString().padStart(2, '0')} | ${entry.pct}% | ${formattedPoints} |\n`;
+  });
+
+  try {
+    await navigator.clipboard.writeText(markdown);
+    const originalContent = copyTableButton.innerHTML;
+    copyTableButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-teal-500"><path d="M20 6 9 17l-5-5"/></svg>
+      Kopiert!
+    `;
+    setTimeout(() => {
+      copyTableButton.innerHTML = originalContent;
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy table:', err);
+  }
+});
+
+resetGradesButton?.addEventListener('click', () => {
+  const inputs = gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input');
+  inputs?.forEach(input => input.value = '');
+  calculateAverage();
+  saveState();
 });
 
 // --- Lifecycle ---

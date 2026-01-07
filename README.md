@@ -5,10 +5,14 @@ Ein moderner, performanter Notenrechner für das MSS-Punktesystem (Mainzer Studi
 ## 🚀 Features
 
 -   **Echtzeit-Berechnung:** Ergebnisse werden sofort bei der Eingabe aktualisiert.
+-   **Schnellwahl-Presets:** Gängige maximale Punktzahlen (15, 20, 30, etc.) mit einem Klick setzen.
 -   **Anpassbare Rundung:** Unterstützung für "Exakt", "Abrunden" (Standard), "0,5er Schritte" und "Aufrunden".
--   **IST-Prozentanzeige:** Zeigt den tatsächlichen Prozentsatz nach der Rundung an, um Transparenz über die Notengebung zu schaffen.
+-   **IST-Prozentanzeige:** Visuelle Fortschrittsbalken und Anzeige des tatsächlichen Prozentsatzes nach der Rundung.
+-   **Notenschnitt-Rechner:** Integrierter Rechner für den Durchschnitt von MSS-Noten inklusive Verteilungsdiagramm.
+-   **Export-Funktionen:** Direkter Export der Tabelle als Markdown in die Zwischenablage oder Teilen via System-Share.
 -   **Modernes UI:** Dunkelmodus-Unterstützung, optimiert für Mobile und Desktop (Tailwind CSS 4).
--   **Barrierefrei:** Tabellen-Layout mit `table-fixed` für ein stabiles UI ohne springende Elemente.
+-   **PWA-Ready:** Offline-Unterstützung und "Zum Home-Bildschirm hinzufügen".
+-   **Barrierefrei:** Semantisches HTML, ARIA-Labels und tastaturbedienbar.
 
 ## 🛠 Tech Stack
 
