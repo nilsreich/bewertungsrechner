@@ -24,70 +24,132 @@
     </noscript>
    </head>
   <body class="bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-neutral-200 min-h-screen transition-colors duration-300 antialiased">
-    <div id="app" class="min-h-screen bg-slate-50 dark:bg-[#050505]">
-      <main class="max-w-2xl mx-auto px-4 sm:px-6 pb-12">
+    <div id="app" class="min-h-screen bg-slate-50 dark:bg-[#050505] flex flex-col md:flex-row items-stretch relative">
+      <!-- Sidebar / Navigation -->
+      <aside class="fixed bottom-0 left-0 right-0 z-50 md:static md:w-64 border-t md:border-t-0 md:border-r border-slate-200 dark:border-neutral-800 no-print bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl">
+        <nav class="md:h-screen md:sticky md:top-0 p-3 md:p-6">
+          <div class="flex flex-row md:flex-col justify-around md:justify-start gap-1 md:gap-2 nav-links">
+            <a href="#input-section" data-section="input-section" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:px-4 md:py-2.5 rounded-xl text-slate-600 dark:text-neutral-400 font-bold text-sm transition-all hover:bg-slate-100 dark:hover:bg-neutral-800">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <span class="hidden md:inline whitespace-nowrap">Konfiguration</span>
+            </a>
+            <a href="#thresholds" data-section="thresholds" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:px-4 md:py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-neutral-800 text-slate-600 dark:text-neutral-400 font-bold text-sm transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l3-3 3 3 5-5"/></svg>
+              <span class="hidden md:inline whitespace-nowrap">Punktetabelle</span>
+            </a>
+            <a href="#students" data-section="students" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:px-4 md:py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-neutral-800 text-slate-600 dark:text-neutral-400 font-bold text-sm transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span class="hidden md:inline whitespace-nowrap">Schülerliste</span>
+            </a>
+            <a href="#overview" data-section="overview" class="nav-link flex flex-col md:flex-row items-center gap-1 md:gap-3 px-3 py-2 md:px-4 md:py-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-neutral-800 text-slate-600 dark:text-neutral-400 font-bold text-sm transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <span class="hidden md:inline whitespace-nowrap">Übersicht</span>
+            </a>
+          </div>
+        </nav>
+      </aside>
+
+      <main class="flex-1 max-w-4xl mx-auto px-4 sm:px-6 pb-24 md:pb-12 w-full">
         
+        <!-- App Title -->
+        <div class="mb-12 mt-10 md:mt-16 no-print flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 class="text-4xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter">Notenrechner</h1>
+            <p class="text-[10px] md:text-xs font-bold text-slate-500 dark:text-neutral-400 uppercase tracking-[0.4em] mt-3">MSS Punktesystem</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <input type="file" id="csvImportInput" accept=".csv" class="hidden">
+            <label for="csvImportInput" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-400 font-bold text-xs cursor-pointer hover:bg-slate-200 dark:hover:bg-neutral-700 transition-all border border-slate-200 dark:border-neutral-700 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              CSV IMPORT
+            </label>
+          </div>
+        </div>
+
         <!-- Print-only Title -->
         <div class="hidden print:block print:mb-8 border-b-2 border-black pb-2">
           <h1 class="text-2xl font-black text-black">MSS PUNKTESPIEGEL</h1>
           <p class="text-xs font-bold text-black uppercase tracking-widest mt-1">Erstellt mit MSS-Notenrechner.de</p>
         </div>
 
-        <!-- Sticky Header Container -->
-        <div class="sticky top-0 z-20 pt-6 pb-4 bg-slate-50/80 dark:bg-[#050505]/80 backdrop-blur-lg border-b border-slate-200 dark:border-neutral-900 mb-6">
+        <!-- Header Container -->
+        <section id="input-section" class="pt-6 pb-4 mb-6">
           <div class="flex flex-col space-y-6">
             
-            <!-- Input Section -->
-            <div class="relative max-w-md mx-auto w-full group" >
-              <label class="block text-[10px] font-bold text-slate-600 dark:text-neutral-400 mb-2 uppercase tracking-[0.2em] text-center print:text-left print:mb-0">
-                Maximale Punktzahl
-              </label>
-              <div class="relative">
+            <!-- Exam Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+              <div class="flex flex-col md:flex-row md:col-span-2 gap-4">
+                <div class="flex-1">
+                  <label class="block text-[10px] font-bold text-slate-500 dark:text-neutral-400 mb-1.5 uppercase tracking-[0.2em] print:text-black">Bezeichnung der Arbeit</label>
+                  <input 
+                    id="examTitle"
+                    type="text" 
+                    placeholder="z.B. 1. Klassenarbeit BGY25d" 
+                    class="w-full rounded-xl border-2 border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-3 text-base font-bold text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-teal-500 transition-all shadow-sm print:border-none print:p-0 print:text-lg print:text-black print:bg-transparent shadow-none"
+                  />
+                </div>
+                <div class="w-full md:w-32">
+                  <label class="block text-[10px] font-bold text-slate-500 dark:text-neutral-400 mb-1.5 uppercase tracking-[0.2em] print:text-black">Max. Pkt</label>
+                  <div class="relative group">
+                    <input 
+                      id="maxPoints"
+                      type="number" 
+                      inputmode="decimal"
+                      placeholder="0" 
+                      class="w-full rounded-xl border-2 border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-3 text-lg font-black text-slate-900 dark:text-white text-center placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-teal-500 transition-all shadow-sm print:border-none print:p-0 print:text-black print:bg-transparent shadow-none"
+                    />
+                    <button id="clearMaxPoints" aria-label="Löschen" class="absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors cursor-pointer no-print p-1 hidden">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 dark:text-neutral-400 mb-1.5 uppercase tracking-[0.2em] print:text-black">Geschrieben am</label>
                 <input 
-                  id="maxPoints"
-                  type="number" 
-                  inputmode="decimal"
-                  placeholder="0" 
-                  class="w-full rounded-3xl border-2 border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-4 sm:p-5 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white text-center placeholder:text-slate-400 dark:placeholder:text-neutral-600 focus:border-teal-500 dark:focus:border-teal-500 focus:outline-none transition-all shadow-sm dark:shadow-inner print:text-left print:p-0 print:text-xl print:border-none print:shadow-none"
+                  id="examDate"
+                  type="date" 
+                  class="w-full rounded-xl border-2 border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-3 text-sm font-bold text-slate-900 dark:text-white focus:border-teal-500 transition-all shadow-sm print:border-none print:p-0 print:text-black print:bg-transparent shadow-none"
                 />
-                <button id="clearMaxPoints" aria-label="Eingabe löschen" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors cursor-pointer no-print p-2 rounded-full hover:bg-slate-100 dark:hover:bg-neutral-800 hidden">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
               </div>
-
-            </div>
-
-            <!-- Rounding Toggle Segmented Control -->
-            <div class="flex bg-slate-200 dark:bg-neutral-900/80 p-1.5 rounded-2xl border border-slate-300 dark:border-neutral-800 shadow-sm max-w-md mx-auto w-full">
-              <div class="flex-1">
-                <input type="radio" id="roundNone" name="rounding" value="none" class="hidden segment-button">
-                <label for="roundNone" class="block text-center py-2 text-[11px] font-bold rounded-xl cursor-pointer transition-all hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-neutral-400 uppercase tracking-tight">Exakt</label>
-              </div>
-              <div class="flex-1">
-                <input type="radio" id="roundDown" name="rounding" value="down" class="hidden segment-button" checked>
-                <label for="roundDown" class="block text-center py-2 text-[11px] font-bold rounded-xl cursor-pointer transition-all hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-neutral-400 uppercase tracking-tight border-l border-slate-300 dark:border-neutral-800/50">Ab</label>
-              </div>
-              <div class="flex-1">
-                <input type="radio" id="roundHalf" name="rounding" value="half" class="hidden segment-button">
-                <label for="roundHalf" class="block text-center py-2 text-[11px] font-bold rounded-xl cursor-pointer transition-all hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-neutral-400 uppercase tracking-tight border-l border-slate-300 dark:border-neutral-800/50">0,5er</label>
-              </div>
-              <div class="flex-1">
-                <input type="radio" id="roundUp" name="rounding" value="up" class="hidden segment-button">
-                <label for="roundUp" class="block text-center py-2 text-[11px] font-bold rounded-xl cursor-pointer transition-all hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-neutral-100 uppercase tracking-tight border-l border-slate-300 dark:border-neutral-800/50">Auf</label>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 dark:text-neutral-400 mb-1.5 uppercase tracking-[0.2em] print:text-black">Korrigiert am</label>
+                <input 
+                  id="correctionDate"
+                  type="date" 
+                  class="w-full rounded-xl border-2 border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-3 text-sm font-bold text-slate-900 dark:text-white focus:border-teal-500 transition-all shadow-sm print:border-none print:p-0 print:text-black print:bg-transparent shadow-none"
+                />
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         <!-- Result Table -->
-        <div class="flex items-center justify-between mb-4 px-2">
-          <h2 class="text-[10px] font-bold text-slate-600 dark:text-neutral-400 uppercase tracking-[0.2em]">Punktetabelle</h2>
-          <button id="copyTableButton" class="no-print text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest flex items-center gap-1.5 hover:opacity-70 transition-opacity cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
-            Tabelle kopieren
-          </button>
-        </div>
-        <div class="overflow-hidden rounded-3xl border border-slate-200 dark:border-neutral-800 shadow-xl bg-white dark:bg-neutral-900/20">
+        <section id="thresholds" class="mb-4">
+          <div class="flex flex-col gap-3 mb-4 px-2">
+            <h2 class="text-[10px] font-bold text-slate-600 dark:text-neutral-400 uppercase tracking-[0.2em]">Punktetabelle</h2>
+            
+            <!-- Rounding Toggle Segmented Control -->
+            <div class="flex bg-slate-200 dark:bg-neutral-900/80 p-1 rounded-xl border border-slate-300 dark:border-neutral-800 shadow-sm max-w-[280px] w-full">
+              <div class="flex-1">
+                <input type="radio" id="roundNone" name="rounding" value="none" class="hidden segment-button">
+                <label for="roundNone" class="block text-center py-1.5 text-[10px] font-bold rounded-lg cursor-pointer transition-all hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-neutral-400 uppercase tracking-tight">Exakt</label>
+              </div>
+              <div class="flex-1">
+                <input type="radio" id="roundDown" name="rounding" value="down" class="hidden segment-button" checked>
+                <label for="roundDown" class="block text-center py-1.5 text-[10px] font-bold rounded-lg cursor-pointer transition-all hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-neutral-400 uppercase tracking-tight border-l border-slate-300 dark:border-neutral-800/50">Ab</label>
+              </div>
+              <div class="flex-1">
+                <input type="radio" id="roundHalf" name="rounding" value="half" class="hidden segment-button">
+                <label for="roundHalf" class="block text-center py-1.5 text-[10px] font-bold rounded-lg cursor-pointer transition-all hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-neutral-400 uppercase tracking-tight border-l border-slate-300 dark:border-neutral-800/50">0,5er</label>
+              </div>
+              <div class="flex-1">
+                <input type="radio" id="roundUp" name="rounding" value="up" class="hidden segment-button">
+                <label for="roundUp" class="block text-center py-1.5 text-[10px] font-bold rounded-lg cursor-pointer transition-all hover:text-slate-900 dark:hover:text-white text-slate-600 dark:text-neutral-100 uppercase tracking-tight border-l border-slate-300 dark:border-neutral-800/50">Auf</label>
+              </div>
+            </div>
+          </div>
+          <div class="overflow-hidden rounded-3xl border border-slate-200 dark:border-neutral-800 shadow-xl bg-white dark:bg-neutral-900/20">
           <table class="w-full table-fixed border-collapse tabular-nums">
             <thead class="bg-slate-100 dark:bg-neutral-900/40">
               <tr>
@@ -180,43 +242,52 @@
               </tr>
             </tbody>
           </table>
-        </div>
+        </section>
 
-        <!-- Grade Average Calculator Section -->
-        <div class="mt-16 pt-12 border-t border-slate-200 dark:border-neutral-900">
-          <div class="flex items-center justify-between mb-8 px-2">
-            <h2 class="text-[10px] font-bold text-slate-600 dark:text-neutral-400 uppercase tracking-[0.2em]">Notenschnitt (MSS)</h2>
-            <button id="resetGradesButton" class="no-print text-[10px] font-bold text-red-600 dark:text-red-500 uppercase tracking-widest flex items-center gap-1.5 hover:opacity-70 transition-opacity cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-              Löschen
+        <!-- Student Section -->
+        <section id="students" class="mt-12 pt-12 border-t border-slate-200 dark:border-neutral-900">
+           <div class="flex items-center justify-between mb-4 px-2">
+            <h2 class="text-[10px] font-bold text-slate-600 dark:text-neutral-400 uppercase tracking-[0.2em]">Schülerergebnisse</h2>
+            <button id="importStudentsBtn" class="no-print text-[10px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest flex items-center gap-1.5 hover:opacity-70 transition-opacity cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>
+              Schüler importieren
             </button>
           </div>
+
+          <!-- Hidden Import Area -->
+          <div id="importArea" class="hidden mb-6 p-4 bg-white dark:bg-neutral-900 rounded-2xl border border-slate-200 dark:border-neutral-800 shadow-sm transition-all">
+            <p class="text-[10px] font-bold text-slate-500 dark:text-neutral-400 uppercase mb-2">Namen eingeben (einer pro Zeile):</p>
+            <textarea id="studentNamesInput" rows="5" class="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-neutral-800 rounded-xl p-3 text-sm focus:outline-none focus:ring-1 focus:ring-teal-500 mb-3" placeholder="Max Mustermann&#10;Erika Musterfrau"></textarea>
+            <div class="flex justify-end gap-2">
+               <button id="cancelImport" class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-700 cursor-pointer">Abbrechen</button>
+               <button id="confirmImport" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-teal-700 cursor-pointer">Importieren</button>
+            </div>
+          </div>
+
+          <div class="overflow-hidden rounded-3xl border border-slate-200 dark:border-neutral-800 shadow-xl bg-white dark:bg-neutral-900/20">
+            <table class="w-full table-fixed border-collapse tabular-nums">
+              <thead class="bg-slate-100 dark:bg-neutral-900/40">
+                <tr>
+                  <th class="w-1/2 p-4 text-left text-slate-600 dark:text-neutral-400 text-[10px] uppercase tracking-[0.2em] font-black border-b border-slate-200 dark:border-neutral-800">Schüler Name</th>
+                  <th class="w-1/4 p-4 text-center text-slate-600 dark:text-neutral-400 text-[10px] uppercase tracking-[0.2em] font-black border-b border-slate-200 dark:border-neutral-800">Erreicht</th>
+                  <th class="w-1/4 p-4 text-right text-slate-600 dark:text-neutral-400 text-[10px] uppercase tracking-[0.2em] font-black border-b border-slate-200 dark:border-neutral-800">MSS</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody">
+                <!-- Data rows here -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Grade Average Calculator Section -->
+        <section id="overview" class="mt-16 pt-12 border-t border-slate-200 dark:border-neutral-900">
+          <div class="flex items-center justify-between mb-8 px-2">
+            <h2 class="text-[10px] font-bold text-slate-600 dark:text-neutral-400 uppercase tracking-[0.2em]">Notenschnitt (MSS)</h2>
+          </div>
           
-          <div class="grid grid-cols-6 sm:grid-cols-6 gap-2 mb-8" id="gradeInputsContainer">
-            <div class="flex flex-col items-center space-y-1">
-              <label class="text-[9px] font-bold text-slate-500 dark:text-neutral-400 uppercase">Note 1</label>
-              <input type="number" min="0" placeholder="0" data-grade="1" class="w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600">
-            </div>
-            <div class="flex flex-col items-center space-y-1">
-              <label class="text-[9px] font-bold text-slate-500 dark:text-neutral-400 uppercase">Note 2</label>
-              <input type="number" min="0" placeholder="0" data-grade="2" class="w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600">
-            </div>
-            <div class="flex flex-col items-center space-y-1">
-              <label class="text-[9px] font-bold text-slate-500 dark:text-neutral-400 uppercase">Note 3</label>
-              <input type="number" min="0" placeholder="0" data-grade="3" class="w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600">
-            </div>
-            <div class="flex flex-col items-center space-y-1">
-              <label class="text-[9px] font-bold text-slate-500 dark:text-neutral-400 uppercase">Note 4</label>
-              <input type="number" min="0" placeholder="0" data-grade="4" class="w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600">
-            </div>
-            <div class="flex flex-col items-center space-y-1">
-              <label class="text-[9px] font-bold text-slate-500 dark:text-neutral-400 uppercase">Note 5</label>
-              <input type="number" min="0" placeholder="0" data-grade="5" class="w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600">
-            </div>
-            <div class="flex flex-col items-center space-y-1">
-              <label class="text-[9px] font-bold text-slate-500 dark:text-neutral-400 uppercase">Note 6</label>
-              <input type="number" min="0" placeholder="0" data-grade="6" class="w-full bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-lg p-1.5 text-center text-sm font-bold text-slate-700 dark:text-neutral-300 focus:ring-1 focus:ring-teal-500 focus:outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-neutral-600">
-            </div>
+          <div class="hidden" id="gradeInputsContainer">
+            <!-- Legacy manual inputs hidden -->
           </div>
 
           <div class="bg-white dark:bg-neutral-900/40 rounded-3xl p-6 border border-slate-200 dark:border-neutral-800 shadow-xl overflow-hidden relative">
@@ -283,25 +354,40 @@
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Print & Share Button -->
-        <div class="mt-12 mb-8 flex flex-col sm:flex-row justify-center gap-4 no-print">
-          <button 
-            onclick="window.print()" 
-            class="flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-neutral-900 text-slate-900 dark:text-white rounded-2xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-neutral-800 transition-colors cursor-pointer shadow-sm border border-slate-200 dark:border-neutral-800"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect width="12" height="8" x="6" y="14" rx="1"/></svg>
-            Drucken
-          </button>
-          <button 
-            id="shareButton"
-            class="flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold text-sm hover:scale-105 transition-all cursor-pointer shadow-lg"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Teilen
-          </button>
+        <!-- Action Bar -->
+        <div class="no-print mt-20 mb-12 pt-12 border-t border-slate-200 dark:border-neutral-900">
+                    <div class="flex items-center justify-between mb-8 px-2">
+            <h2 class="text-[10px] font-bold text-slate-600 dark:text-neutral-400 uppercase tracking-[0.2em]">Daten exportieren</h2>
+          </div>
+          <div class="w-full p-6 rounded-[2.5rem] shadow-xl flex flex-col sm:flex-row justify-center items-center gap-6">
+            <button 
+              id="exportCsvButton"
+              class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-teal-600 text-white rounded-2xl font-bold text-sm hover:scale-105 transition-all cursor-pointer shadow-lg active:scale-95"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              CSV exportieren
+            </button>
+            
+            <button 
+              onclick="window.print()" 
+              class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-slate-100 dark:bg-neutral-800 text-slate-900 dark:text-white rounded-2xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-neutral-700 transition-colors cursor-pointer shadow-sm border border-slate-200 dark:border-neutral-700 active:scale-95"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><rect width="12" height="8" x="6" y="14" rx="1"/></svg>
+              Drucken
+            </button>
+
+            <button 
+              id="resetGradesButton"
+              class="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-2xl font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors cursor-pointer border border-red-100 dark:border-red-900/30 active:scale-95"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              Alles löschen
+            </button>
+          </div>
         </div>
+        
 
       </main>
     </div>

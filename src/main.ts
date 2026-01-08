@@ -8,6 +8,11 @@ interface ScaleEntry {
   pct: number;
 }
 
+interface Student {
+  name: string;
+  points: string;
+}
+
 type RoundingMode = 'none' | 'down' | 'half' | 'up';
 
 // --- Configuration & Constants ---
@@ -26,6 +31,9 @@ const MSS_SCALE: ScaleEntry[] = [
 
 const maxPointsInput = document.querySelector<HTMLInputElement>('#maxPoints');
 const clearMaxPoints = document.querySelector<HTMLButtonElement>('#clearMaxPoints');
+const examTitleInput = document.querySelector<HTMLInputElement>('#examTitle');
+const examDateInput = document.querySelector<HTMLInputElement>('#examDate');
+const correctionDateInput = document.querySelector<HTMLInputElement>('#correctionDate');
 const tableBody = document.querySelector<HTMLTableSectionElement>('#tableBody');
 const roundingInputs = document.querySelectorAll<HTMLInputElement>('input[name="rounding"]');
 const gradeInputsContainer = document.querySelector<HTMLDivElement>('#gradeInputsContainer');
@@ -33,98 +41,70 @@ const gradeCountDisplay = document.querySelector<HTMLDivElement>('#gradeCountDis
 const averageDisplay = document.querySelector<HTMLDivElement>('#averageDisplay');
 const distributionBar = document.querySelector<HTMLDivElement>('#distributionBar');
 const distributionLegend = document.querySelector<HTMLDivElement>('#distributionLegend');
-const shareButton = document.querySelector<HTMLButtonElement>('#shareButton');
 const copyTableButton = document.querySelector<HTMLButtonElement>('#copyTableButton');
 const resetGradesButton = document.querySelector<HTMLButtonElement>('#resetGradesButton');
 const presetButtons = document.querySelectorAll<HTMLButtonElement>('.preset-btn');
 
+// --- Student References ---
+const importStudentsBtn = document.querySelector<HTMLButtonElement>('#importStudentsBtn');
+const exportCsvButton = document.querySelector<HTMLButtonElement>('#exportCsvButton');
+const csvImportInput = document.querySelector<HTMLInputElement>('#csvImportInput');
+const importArea = document.querySelector<HTMLDivElement>('#importArea');
+const studentNamesInput = document.querySelector<HTMLTextAreaElement>('#studentNamesInput');
+const confirmImport = document.querySelector<HTMLButtonElement>('#confirmImport');
+const cancelImport = document.querySelector<HTMLButtonElement>('#cancelImport');
+const studentTableBody = document.querySelector<HTMLTableSectionElement>('#studentTableBody');
+
+let students: Student[] = [];
+
 // --- Core Logic ---
 
 /**
- * Updates URL search parameters based on current state
- */
-function updateUrlParams(): void {
-  const params = new URLSearchParams();
-  
-  const maxPoints = maxPointsInput?.value || '';
-  if (maxPoints) params.set('m', maxPoints);
-  
-  const rounding = getActiveRounding();
-  if (rounding !== 'down') params.set('r', rounding);
-  
-  const grades = Array.from(gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input') || []);
-  const gradeCounts = grades.map(input => input.value || '0').join(',');
-  if (gradeCounts.split(',').some(c => c !== '0')) {
-    params.set('g', gradeCounts);
-  }
-
-  const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
-  window.history.replaceState({}, '', newUrl);
-}
-
-/**
- * Saves the current application state to localStorage and URL
+ * Saves the current application state to localStorage
  */
 function saveState(): void {
   const state = {
     maxPoints: maxPointsInput?.value || '',
     rounding: getActiveRounding(),
-    grades: Array.from(gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input') || []).reduce((acc, input) => {
-      acc[input.dataset.grade || ''] = input.value;
-      return acc;
-    }, {} as Record<string, string>)
+    students: students,
+    examTitle: examTitleInput?.value || '',
+    examDate: examDateInput?.value || '',
+    correctionDate: correctionDateInput?.value || ''
   };
   localStorage.setItem('bewertungsrechner_state', JSON.stringify(state));
-  updateUrlParams();
 }
 
 /**
- * Loads the application state from URL or localStorage
+ * Loads the application state from localStorage
  */
 function loadState(): void {
-  const urlParams = new URLSearchParams(window.location.search);
   const saved = localStorage.getItem('bewertungsrechner_state');
   
   try {
-    // 1. Priority: URL Parameters
-    if (urlParams.has('m')) {
-      if (maxPointsInput) {
-        maxPointsInput.value = urlParams.get('m') || '';
-        if (clearMaxPoints) clearMaxPoints.classList.toggle('hidden', !maxPointsInput.value);
-      }
-    } else if (saved) {
+    if (saved) {
       const state = JSON.parse(saved);
       if (maxPointsInput && state.maxPoints !== undefined) {
         maxPointsInput.value = state.maxPoints;
         if (clearMaxPoints) clearMaxPoints.classList.toggle('hidden', !maxPointsInput.value);
       }
-    }
-    
-    if (urlParams.has('r')) {
-      const radio = Array.from(roundingInputs).find(input => input.value === urlParams.get('r'));
-      if (radio) radio.checked = true;
-    } else if (saved) {
-      const state = JSON.parse(saved);
       if (state.rounding) {
         const radio = Array.from(roundingInputs).find(input => input.value === state.rounding);
         if (radio) radio.checked = true;
       }
-    }
-    
-    if (urlParams.has('g')) {
-      const counts = urlParams.get('g')?.split(',') || [];
-      counts.forEach((count, index) => {
-        const input = gradeInputsContainer?.querySelector<HTMLInputElement>(`input[data-grade="${index + 1}"]`);
-        if (input) input.value = count === '0' ? '' : count;
-      });
-    } else if (saved) {
-      const state = JSON.parse(saved);
-      if (state.grades && gradeInputsContainer) {
-        Object.entries(state.grades).forEach(([grade, count]) => {
-          const input = gradeInputsContainer.querySelector<HTMLInputElement>(`input[data-grade="${grade}"]`);
-          if (input) input.value = count as string;
-        });
+      if (examTitleInput && state.examTitle) examTitleInput.value = state.examTitle;
+      if (examDateInput && state.examDate) examDateInput.value = state.examDate;
+      if (correctionDateInput && state.correctionDate) {
+        correctionDateInput.value = state.correctionDate;
+      } else if (correctionDateInput) {
+        correctionDateInput.valueAsDate = new Date();
       }
+      if (state.students) {
+        students = state.students;
+        updateStudentTable();
+      }
+    } else {
+      // Default initial state if none exists
+      if (correctionDateInput) correctionDateInput.valueAsDate = new Date();
     }
   } catch (e) {
     console.error("Failed to load state:", e);
@@ -132,26 +112,24 @@ function loadState(): void {
 }
 
 /**
- * Initializes the grade average calculator section by attaching event listeners to pre-rendered inputs
+ * Helper to map MSS points to traditional 1-6 grades
  */
-function initGradeCalculator(): void {
-  const inputs = gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input');
-  inputs?.forEach(input => {
-    input.addEventListener('input', () => {
-      calculateAverage();
-      saveState();
-    });
-  });
+function mssToGrade(mss: number): number {
+  if (mss >= 13) return 1;
+  if (mss >= 10) return 2;
+  if (mss >= 7) return 3;
+  if (mss >= 4) return 4;
+  if (mss >= 1) return 5;
+  return 6;
 }
 
 /**
- * Calculates and renders the average and distribution for traditional grades
+ * Calculates and renders the average and distribution based on student results
  */
-function calculateAverage(): void {
-  const inputs = gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input');
-  if (!inputs || !gradeCountDisplay || !averageDisplay || !distributionBar || !distributionLegend) return;
+function calculateOverview(): void {
+  if (!gradeCountDisplay || !averageDisplay || !distributionBar || !distributionLegend) return;
 
-  let totalGradeValue = 0;
+  let totalMssValue = 0;
   let totalGrades = 0;
   
   const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
@@ -164,22 +142,22 @@ function calculateAverage(): void {
     6: 'bg-red-500'
   };
 
-  inputs.forEach(input => {
-    const count = parseInt(input.value) || 0;
-    const grade = parseInt(input.dataset.grade || '0');
-    
-    if (count > 0) {
-      totalGradeValue += (grade * count);
-      totalGrades += count;
-      distribution[grade] = count;
+  students.forEach(student => {
+    const pts = parseFloat(student.points.replace(',', '.'));
+    if (!isNaN(pts)) {
+      const mss = getMssForPoints(pts);
+      const grade = mssToGrade(mss);
+      totalMssValue += mss;
+      totalGrades += 1;
+      distribution[grade] += 1;
     }
   });
 
-  const average = totalGrades > 0 ? (totalGradeValue / totalGrades) : 0;
+  const averageMss = totalGrades > 0 ? (totalMssValue / totalGrades) : 0;
   
   // Update displays
   gradeCountDisplay.innerText = totalGrades.toString();
-  averageDisplay.innerText = average.toFixed(2);
+  averageDisplay.innerText = averageMss.toFixed(2);
 
   // Render Graphical Distribution
   distributionLegend.replaceChildren();
@@ -201,14 +179,12 @@ function calculateAverage(): void {
       }
 
       if (bar) {
-        // Higher specific animation: update height
         bar.style.height = count > 0 ? `max(4px, ${percentageOfMax}%)` : '2px';
         bar.classList.toggle('opacity-10', count === 0);
       }
     }
 
     if (count > 0) {
-      // Legend item
       const legendItem = document.createElement('div');
       legendItem.className = "flex items-center space-x-1.5";
       legendItem.innerHTML = `
@@ -218,6 +194,112 @@ function calculateAverage(): void {
       distributionLegend.appendChild(legendItem);
     }
   });
+}
+
+/**
+ * Finds the MSS points for a given score based on current thresholds
+ */
+function getMssForPoints(points: number): number {
+  const max = parseFloat(maxPointsInput?.value.replace(',', '.') || '0');
+  const mode = getActiveRounding();
+  if (max === 0) return 0;
+  
+  for (const entry of MSS_SCALE) {
+    const thresholdRaw = max * (entry.pct / 100);
+    const thresholdRounded = calculatePoints(thresholdRaw, mode);
+    if (points >= thresholdRounded) {
+      return entry.mss;
+    }
+  }
+  return 0;
+}
+
+/**
+ * Renders the student table or updates existing rows
+ */
+function updateStudentTable(forceReRender: boolean = false): void {
+  if (!studentTableBody) return;
+  
+  if (forceReRender || studentTableBody.children.length !== students.length) {
+    studentTableBody.replaceChildren();
+
+    students.forEach((student, index) => {
+      const pts = parseFloat(student.points.replace(',', '.'));
+      const mss = !isNaN(pts) ? getMssForPoints(pts) : null;
+      
+      const row = document.createElement('tr');
+      row.className = "border-t border-slate-100 dark:border-neutral-900/50 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors";
+      
+      let mssDisplay = '—';
+      let mssColor = "text-slate-300 dark:text-neutral-700";
+      
+      if (mss !== null) {
+        mssDisplay = mss.toString().padStart(2, '0');
+        if (mss >= 13) mssColor = "text-teal-600 dark:text-teal-400 font-bold";
+        else if (mss < 5) mssColor = "text-red-600 dark:text-red-500";
+        else mssColor = "text-slate-600 dark:text-neutral-400 font-bold";
+      }
+
+      row.innerHTML = `
+        <td class="p-4 text-left font-medium text-slate-700 dark:text-neutral-300 text-sm">
+          ${student.name}
+        </td>
+        <td class="p-4 text-center">
+          <input 
+            type="text" 
+            inputmode="decimal"
+            value="${student.points}" 
+            class="w-16 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-neutral-800 rounded-lg p-1 text-center text-sm font-bold focus:outline-none focus:ring-1 focus:ring-teal-500"
+            data-index="${index}"
+          />
+        </td>
+        <td class="p-4 text-right font-black font-mono text-xl ${mssColor}">
+          ${mssDisplay}
+        </td>
+      `;
+
+      const input = row.querySelector('input') as HTMLInputElement;
+      input?.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        students[index].points = target.value;
+        updateStudentRow(index);
+        calculateOverview();
+        saveState();
+      });
+
+      studentTableBody.appendChild(row);
+    });
+  } else {
+    students.forEach((_, index) => updateStudentRow(index));
+  }
+}
+
+/**
+ * Updates a single row in the student table (to avoid focus loss)
+ */
+function updateStudentRow(index: number): void {
+  const row = studentTableBody?.children[index];
+  if (!row) return;
+
+  const student = students[index];
+  const pts = parseFloat(student.points.replace(',', '.'));
+  const mss = !isNaN(pts) ? getMssForPoints(pts) : null;
+  const mssCell = row.querySelector('td:last-child') as HTMLElement;
+
+  if (mssCell) {
+    let mssDisplay = '—';
+    mssCell.className = "p-4 text-right font-black font-mono text-xl "; 
+    
+    if (mss !== null) {
+      mssDisplay = mss.toString().padStart(2, '0');
+      if (mss >= 13) mssCell.classList.add("text-teal-600", "dark:text-teal-400", "font-bold");
+      else if (mss < 5) mssCell.classList.add("text-red-600", "dark:text-red-500");
+      else mssCell.classList.add("text-slate-600", "dark:text-neutral-400", "font-bold");
+    } else {
+      mssCell.classList.add("text-slate-200", "dark:text-neutral-800");
+    }
+    mssCell.innerText = mssDisplay;
+  }
 }
 
 // --- Core Logic ---
@@ -324,19 +406,190 @@ function updateTable(): void {
 
 // --- Event Handlers ---
 
+importStudentsBtn?.addEventListener('click', () => {
+  importArea?.classList.remove('hidden');
+  studentNamesInput?.focus();
+});
+
+cancelImport?.addEventListener('click', () => {
+  importArea?.classList.add('hidden');
+  if (studentNamesInput) studentNamesInput.value = '';
+});
+
+confirmImport?.addEventListener('click', () => {
+  if (!studentNamesInput) return;
+  const names = studentNamesInput.value.split('\n').map(n => n.trim()).filter(n => n !== '');
+  
+  const newStudents = names.map(name => ({ name, points: '' }));
+  students = [...students, ...newStudents];
+  
+  studentNamesInput.value = '';
+  importArea?.classList.add('hidden');
+  updateStudentTable(true);
+  calculateOverview();
+  saveState();
+});
+
+exportCsvButton?.addEventListener('click', () => {
+  const max = parseFloat(maxPointsInput?.value.replace(',', '.') || '0');
+  const mode = getActiveRounding();
+  
+  // 1. Overview & Distribution
+  let totalMssValue = 0;
+  let totalCount = 0;
+  const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+  
+  students.forEach(s => {
+    const pts = parseFloat(s.points.replace(',', '.'));
+    if (!isNaN(pts)) {
+      const mss = getMssForPoints(pts);
+      const grade = mssToGrade(mss);
+      totalMssValue += mss;
+      totalCount++;
+      distribution[grade]++;
+    }
+  });
+
+  const averageMss = totalCount > 0 ? (totalMssValue / totalCount) : 0;
+
+  let csv = '\ufeff'; // UTF-8 BOM for Excel
+  csv += 'BEWERTUNG ÜBERSICHT\n';
+  if (examTitleInput?.value) csv += `Bezeichnung;${examTitleInput.value}\n`;
+  if (examDateInput?.value) csv += `Geschrieben am;${examDateInput.value}\n`;
+  if (correctionDateInput?.value) csv += `Korrigiert am;${correctionDateInput.value}\n`;
+  csv += `Maximale Punktzahl;${max}\n`;
+  csv += `Rundungsmodus;${mode}\n`;
+  csv += `Anzahl Schüler;${totalCount}\n`;
+  csv += `MSS Durchschnitt;${averageMss.toFixed(2).replace('.', ',')}\n\n`;
+
+  csv += 'NOTENVERTEILUNG\n';
+  for (let g = 1; g <= 6; g++) {
+    csv += `Note ${g};${distribution[g]}\n`;
+  }
+  csv += '\n';
+
+  // 2. Threshold Table
+  csv += 'PUNKTETABELLE\n';
+  csv += 'MSS;Limit (%);Punkte\n';
+  MSS_SCALE.forEach(entry => {
+    const rawPoints = max * (entry.pct / 100);
+    const roundedPoints = calculatePoints(rawPoints, mode);
+    const formattedPoints = roundedPoints.toLocaleString('de-DE', {
+      minimumFractionDigits: (mode === 'half' || mode === 'none') ? (mode === 'none' ? 2 : 1) : 0,
+      maximumFractionDigits: 2
+    });
+    csv += `${entry.mss};${entry.pct}%;"${formattedPoints}"\n`;
+  });
+  csv += '\n';
+
+  // 3. Student Results
+  csv += 'SCHÜLER ERGEBNISSE\n';
+  csv += 'Name;Erreicht;MSS;Note\n';
+  students.forEach(s => {
+    const pts = parseFloat(s.points.replace(',', '.'));
+    const mss = !isNaN(pts) ? getMssForPoints(pts) : '';
+    const grade = !isNaN(pts) ? mssToGrade(mss as number) : '';
+    csv += `${s.name};${s.points};${mss};${grade}\n`;
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  const fileName = examTitleInput?.value 
+    ? examTitleInput.value.replace(/[^a-z0-9]/gi, '_').toLowerCase() 
+    : `Bewertung_${new Date().toISOString().split('T')[0]}`;
+    
+  link.setAttribute('href', url);
+  link.setAttribute('download', `${fileName}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+});
+
+csvImportInput?.addEventListener('change', (e) => {
+  const file = (e.target as HTMLInputElement).files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const text = event.target?.result as string;
+    if (!text) return;
+
+    const lines = text.split('\n');
+    let isStudentSection = false;
+    const newStudents: Student[] = [];
+
+    lines.forEach(line => {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) return;
+
+      if (trimmedLine.includes('SCHÜLER ERGEBNISSE')) {
+        isStudentSection = true;
+        return;
+      }
+
+      const parts = trimmedLine.split(';');
+      if (parts.length < 2) return;
+
+      const key = parts[0].replace(/^"|"$/g, '').trim();
+      const value = parts[1].replace(/^"|"$/g, '').trim();
+
+      if (!isStudentSection) {
+        if (key === 'Bezeichnung' && examTitleInput) examTitleInput.value = value;
+        else if (key === 'Geschrieben am' && examDateInput) examDateInput.value = value;
+        else if (key === 'Korrigiert am' && correctionDateInput) correctionDateInput.value = value;
+        else if (key === 'Maximale Punktzahl' && maxPointsInput) {
+          maxPointsInput.value = value;
+          if (clearMaxPoints) clearMaxPoints.classList.toggle('hidden', !value);
+        }
+        else if (key === 'Rundungsmodus') {
+          const radio = Array.from(roundingInputs).find(input => input.value === value);
+          if (radio) radio.checked = true;
+        }
+      } else {
+        // We are in student section. Skip the header row "Name;Erreicht;..."
+        if (key === 'Name') return;
+        newStudents.push({ name: key, points: value });
+      }
+    });
+
+    if (newStudents.length > 0) {
+      students = newStudents;
+      updateTable();
+      updateStudentTable(true);
+      calculateOverview();
+      saveState();
+      alert('Daten erfolgreich importiert!');
+    }
+    
+    // Reset file input
+    if (csvImportInput) csvImportInput.value = '';
+  };
+  reader.readAsText(file);
+});
+
 maxPointsInput?.addEventListener('input', () => {
   if (clearMaxPoints) {
     clearMaxPoints.classList.toggle('hidden', !maxPointsInput.value);
   }
   updateTable();
+  updateStudentTable();
+  calculateOverview();
   saveState();
 });
+
+examTitleInput?.addEventListener('input', saveState);
+examDateInput?.addEventListener('change', saveState);
+correctionDateInput?.addEventListener('change', saveState);
 
 presetButtons.forEach(btn => btn.addEventListener('click', () => {
   if (maxPointsInput) {
     maxPointsInput.value = btn.dataset.value || '';
     if (clearMaxPoints) clearMaxPoints.classList.remove('hidden');
     updateTable();
+    updateStudentTable();
+    calculateOverview();
     saveState();
   }
 }));
@@ -346,6 +599,8 @@ clearMaxPoints?.addEventListener('click', () => {
     maxPointsInput.value = '';
     clearMaxPoints.classList.add('hidden');
     updateTable();
+    updateStudentTable();
+    calculateOverview();
     saveState();
     maxPointsInput.focus();
   }
@@ -362,36 +617,10 @@ maxPointsInput?.addEventListener('keydown', (e) => {
 
 roundingInputs.forEach(input => input.addEventListener('change', () => {
   updateTable();
+  updateStudentTable();
+  calculateOverview();
   saveState();
 }));
-
-shareButton?.addEventListener('click', async () => {
-  const url = window.location.href;
-  
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: 'MSS Notenrechner',
-        text: 'Meine Notenberechnung',
-        url: url
-      });
-    } catch (err) {
-      console.error('Error sharing:', err);
-    }
-  } else {
-    // Fallback: Copy to clipboard
-    try {
-      await navigator.clipboard.writeText(url);
-      const originalText = shareButton.innerHTML;
-      shareButton.innerHTML = 'Kopiert!';
-      setTimeout(() => {
-        shareButton.innerHTML = originalText;
-      }, 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  }
-});
 
 copyTableButton?.addEventListener('click', async () => {
   const max = parseFloat(maxPointsInput?.value.replace(',', '.') || '0');
@@ -428,26 +657,73 @@ copyTableButton?.addEventListener('click', async () => {
 });
 
 resetGradesButton?.addEventListener('click', () => {
-  const inputs = gradeInputsContainer?.querySelectorAll<HTMLInputElement>('input');
-  inputs?.forEach(input => input.value = '');
-  calculateAverage();
-  saveState();
+  if (confirm('Wirklich alles löschen (Titel, Punkte, Schüler)?')) {
+    // Reset inputs
+    if (examTitleInput) examTitleInput.value = '';
+    if (examDateInput) examDateInput.value = '';
+    if (correctionDateInput) correctionDateInput.valueAsDate = new Date();
+    if (maxPointsInput) {
+      maxPointsInput.value = '';
+      if (clearMaxPoints) clearMaxPoints.classList.add('hidden');
+    }
+    
+    // Reset rounding to default (down)
+    const downRadio = Array.from(roundingInputs).find(input => input.value === 'down');
+    if (downRadio) downRadio.checked = true;
+
+    // Reset students
+    students = [];
+    
+    updateTable();
+    updateStudentTable();
+    calculateOverview();
+    saveState();
+  }
 });
 
 // --- Lifecycle ---
 
+/**
+ * Highlight nav links based on scroll position
+ */
+function initSectionObserver(): void {
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observerOptions = {
+    root: null,
+    rootMargin: '-20% 0px -70% 0px',
+    threshold: 0
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+        });
+      }
+    });
+  }, observerOptions);
+
+  sections.forEach(section => observer.observe(section));
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    initGradeCalculator();
     loadState();
     updateTable();
-    calculateAverage();
+    updateStudentTable();
+    calculateOverview();
+    initSectionObserver();
   });
 } else {
-  initGradeCalculator();
   loadState();
   updateTable();
-  calculateAverage();
+  updateStudentTable();
+  calculateOverview();
+  initSectionObserver();
 }
 
 // Service Worker Registration (Non-blocking)

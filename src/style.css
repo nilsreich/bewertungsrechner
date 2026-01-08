@@ -57,10 +57,44 @@ body {
   background: oklch(0.35 0.02 220);
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
+}
+
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+#app {
+  display: flex;
+  align-items: stretch;
+}
+
+#app > aside {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-link.active {
+  background-color: oklch(51.1% 0.096 186.391 / 0.1);
+  color: oklch(51.1% 0.096 186.391) !important;
+}
+
+.nav-link.active svg {
+  stroke: oklch(51.1% 0.096 186.391);
+}
+
+section {
+  scroll-margin-top: 6rem;
+}
+
+@media (min-width: 768px) {
+  section {
+    scroll-margin-top: 2rem;
+  }
 }
 
 /* Custom Segmented Control Styling */
@@ -108,12 +142,12 @@ tr {
     padding: 0 !important;
   }
 
+  nav,
   .no-print, 
   [name="rounding"], 
   .segment-button, 
   .segment-button + label,
   #shareButton,
-  .sticky,
   button,
   footer,
   .bg-slate-50\/80,
@@ -121,7 +155,7 @@ tr {
     display: none !important;
   }
 
-  #app, .max-w-2xl {
+  #app, .max-w-2xl, .max-w-4xl {
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
