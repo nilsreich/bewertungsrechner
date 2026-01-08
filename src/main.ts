@@ -36,7 +36,6 @@ const examDateInput = document.querySelector<HTMLInputElement>('#examDate');
 const correctionDateInput = document.querySelector<HTMLInputElement>('#correctionDate');
 const tableBody = document.querySelector<HTMLTableSectionElement>('#tableBody');
 const roundingInputs = document.querySelectorAll<HTMLInputElement>('input[name="rounding"]');
-const gradeInputsContainer = document.querySelector<HTMLDivElement>('#gradeInputsContainer');
 const gradeCountDisplay = document.querySelector<HTMLDivElement>('#gradeCountDisplay');
 const averageDisplay = document.querySelector<HTMLDivElement>('#averageDisplay');
 const distributionBar = document.querySelector<HTMLDivElement>('#distributionBar');
