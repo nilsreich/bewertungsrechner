@@ -181,7 +181,7 @@ tr {
   th {
     border-bottom: 1pt solid black !important;
     text-align: left !important;
-    padding: 10pt 6pt !important;
+    padding: 6pt 4pt !important;
     font-weight: 800 !important;
     text-transform: uppercase;
     font-size: 8pt !important;
@@ -190,7 +190,7 @@ tr {
 
   td {
     border-bottom: 0.25pt solid #ddd !important;
-    padding: 8pt 6pt !important;
+    padding: 5pt 4pt !important;
     font-size: 10pt !important;
     vertical-align: middle !important;
   }

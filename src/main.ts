@@ -56,18 +56,6 @@ const studentTableBody = document.querySelector<HTMLTableSectionElement>('#stude
 
 let students: Student[] = [];
 
-// --- Utilities ---
-
-function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
-  let timeout: ReturnType<typeof setTimeout> | null = null;
-  return function(...args: Parameters<T>) {
-    if (timeout) clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      func(...args);
-    }, wait);
-  };
-}
-
 // --- Core Logic ---
 
 /**
@@ -84,8 +72,6 @@ function saveState(): void {
   };
   localStorage.setItem('bewertungsrechner_state', JSON.stringify(state));
 }
-
-const debouncedSaveState = debounce(saveState, 500);
 
 /**
  * Loads the application state from localStorage
@@ -277,7 +263,7 @@ function updateStudentTable(forceReRender: boolean = false): void {
         students[index].points = target.value;
         updateStudentRow(index);
         calculateOverview();
-        debouncedSaveState();
+        saveState();
       });
 
       studentTableBody.appendChild(row);
@@ -400,13 +386,13 @@ function updateTable(): void {
     const row = document.createElement('tr');
     row.className = `${borderClass} ${rowBg} hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors`;
     row.innerHTML = `
-      <td class="p-2 sm:p-3 text-left font-bold font-mono text-lg ${mssColor}">
+      <td class="p-2 text-left font-bold font-mono text-lg ${mssColor}">
         ${entry.mss.toString().padStart(2, '0')}
       </td>
-      <td class="p-2 sm:p-3 text-center leading-tight">
+      <td class="p-2 text-center leading-tight">
         ${pctDisplay}
       </td>
-      <td class="p-2 sm:p-3 text-right font-black font-mono text-lg ${max > 0 ? pointsColor : 'text-slate-200 dark:text-neutral-800'}">
+      <td class="p-2 text-right font-black font-mono text-lg ${max > 0 ? pointsColor : 'text-slate-200 dark:text-neutral-800'}">
         ${max > 0 ? roundedPoints.toLocaleString('de-DE', { 
           minimumFractionDigits: (mode === 'half' || mode === 'none') ? (mode === 'none' ? 2 : 1) : 0,
           maximumFractionDigits: 2
@@ -448,7 +434,7 @@ exportCsvButton?.addEventListener('click', () => {
   const mode = getActiveRounding();
   
   // 1. Overview & Distribution
-  let totalGradeValue = 0;
+  let totalMssValue = 0;
   let totalCount = 0;
   const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
   
@@ -457,13 +443,13 @@ exportCsvButton?.addEventListener('click', () => {
     if (!isNaN(pts)) {
       const mss = getMssForPoints(pts);
       const grade = mssToGrade(mss);
-      totalGradeValue += grade;
+      totalMssValue += mss;
       totalCount++;
       distribution[grade]++;
     }
   });
 
-  const averageGrade = totalCount > 0 ? (totalGradeValue / totalCount) : 0;
+  const averageMss = totalCount > 0 ? (totalMssValue / totalCount) : 0;
 
   let csv = '\ufeff'; // UTF-8 BOM for Excel
   csv += 'BEWERTUNG ÜBERSICHT\n';
@@ -473,7 +459,7 @@ exportCsvButton?.addEventListener('click', () => {
   csv += `Maximale Punktzahl;${max}\n`;
   csv += `Rundungsmodus;${mode}\n`;
   csv += `Anzahl Schüler;${totalCount}\n`;
-  csv += `Notendurchschnitt;${averageGrade.toFixed(2).replace('.', ',')}\n\n`;
+  csv += `MSS Durchschnitt;${averageMss.toFixed(2).replace('.', ',')}\n\n`;
 
   csv += 'NOTENVERTEILUNG\n';
   for (let g = 1; g <= 6; g++) {
@@ -589,10 +575,10 @@ maxPointsInput?.addEventListener('input', () => {
   updateTable();
   updateStudentTable();
   calculateOverview();
-  debouncedSaveState();
+  saveState();
 });
 
-examTitleInput?.addEventListener('input', debouncedSaveState);
+examTitleInput?.addEventListener('input', saveState);
 examDateInput?.addEventListener('change', saveState);
 correctionDateInput?.addEventListener('change', saveState);
 
@@ -738,11 +724,6 @@ if (document.readyState === 'loading') {
   calculateOverview();
   initSectionObserver();
 }
-
-// Ensure state is saved when leaving the page (handling potential unsaved debounced changes)
-window.addEventListener('beforeunload', () => {
-  saveState();
-});
 
 // Service Worker Registration (Non-blocking)
 if ('serviceWorker' in navigator) {
