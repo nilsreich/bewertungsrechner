@@ -142,7 +142,7 @@ function mssToGrade(mss: number): number {
 function calculateOverview(): void {
   if (!gradeCountDisplay || !averageDisplay || !distributionBar || !distributionLegend) return;
 
-  let totalMssValue = 0;
+  let totalGradeValue = 0;
   let totalGrades = 0;
   
   const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
@@ -160,17 +160,17 @@ function calculateOverview(): void {
     if (!isNaN(pts)) {
       const mss = getMssForPoints(pts);
       const grade = mssToGrade(mss);
-      totalMssValue += mss;
+      totalGradeValue += grade;
       totalGrades += 1;
       distribution[grade] += 1;
     }
   });
 
-  const averageMss = totalGrades > 0 ? (totalMssValue / totalGrades) : 0;
+  const averageGrade = totalGrades > 0 ? (totalGradeValue / totalGrades) : 0;
   
   // Update displays
   gradeCountDisplay.innerText = totalGrades.toString();
-  averageDisplay.innerText = averageMss.toFixed(2);
+  averageDisplay.innerText = averageGrade.toFixed(2);
 
   // Render Graphical Distribution
   distributionLegend.replaceChildren();
@@ -254,10 +254,10 @@ function updateStudentTable(forceReRender: boolean = false): void {
       }
 
       row.innerHTML = `
-        <td class="p-4 text-left font-medium text-slate-700 dark:text-neutral-300 text-sm">
+        <td class="p-2 text-left font-medium text-slate-700 dark:text-neutral-300 text-sm">
           ${student.name}
         </td>
-        <td class="p-4 text-center">
+        <td class="p-2 text-center">
           <input 
             type="text" 
             inputmode="decimal"
@@ -266,7 +266,7 @@ function updateStudentTable(forceReRender: boolean = false): void {
             data-index="${index}"
           />
         </td>
-        <td class="p-4 text-right font-black font-mono text-xl ${mssColor}">
+        <td class="p-2 text-right font-black font-mono text-lg ${mssColor}">
           ${mssDisplay}
         </td>
       `;
@@ -301,7 +301,7 @@ function updateStudentRow(index: number): void {
 
   if (mssCell) {
     let mssDisplay = '—';
-    mssCell.className = "p-4 text-right font-black font-mono text-xl "; 
+    mssCell.className = "p-2 text-right font-black font-mono text-lg "; 
     
     if (mss !== null) {
       mssDisplay = mss.toString().padStart(2, '0');
@@ -387,7 +387,7 @@ function updateTable(): void {
 
     // Percentage display logic (Target vs. Actual) with fixed height to prevent layout shift
     let pctDisplay = `
-      <div class="flex flex-col items-center justify-center min-h-[52px]">
+      <div class="flex flex-col items-center justify-center min-h-[40px]">
         <div class="font-bold text-xs text-slate-600 dark:text-neutral-300">${entry.pct}%</div>
         ${max > 0 ? `
           <div class="text-[8px] text-slate-500 dark:text-neutral-400 font-bold tracking-tight mt-1 uppercase">IST: ${effectivePct.toFixed(1)}%</div>
@@ -400,13 +400,13 @@ function updateTable(): void {
     const row = document.createElement('tr');
     row.className = `${borderClass} ${rowBg} hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors`;
     row.innerHTML = `
-      <td class="p-4 sm:p-5 text-left font-bold font-mono text-xl ${mssColor}">
+      <td class="p-2 sm:p-3 text-left font-bold font-mono text-lg ${mssColor}">
         ${entry.mss.toString().padStart(2, '0')}
       </td>
-      <td class="p-4 sm:p-5 text-center leading-tight">
+      <td class="p-2 sm:p-3 text-center leading-tight">
         ${pctDisplay}
       </td>
-      <td class="p-4 sm:p-5 text-right font-black font-mono text-xl ${max > 0 ? pointsColor : 'text-slate-200 dark:text-neutral-800'}">
+      <td class="p-2 sm:p-3 text-right font-black font-mono text-lg ${max > 0 ? pointsColor : 'text-slate-200 dark:text-neutral-800'}">
         ${max > 0 ? roundedPoints.toLocaleString('de-DE', { 
           minimumFractionDigits: (mode === 'half' || mode === 'none') ? (mode === 'none' ? 2 : 1) : 0,
           maximumFractionDigits: 2
@@ -448,7 +448,7 @@ exportCsvButton?.addEventListener('click', () => {
   const mode = getActiveRounding();
   
   // 1. Overview & Distribution
-  let totalMssValue = 0;
+  let totalGradeValue = 0;
   let totalCount = 0;
   const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
   
@@ -457,13 +457,13 @@ exportCsvButton?.addEventListener('click', () => {
     if (!isNaN(pts)) {
       const mss = getMssForPoints(pts);
       const grade = mssToGrade(mss);
-      totalMssValue += mss;
+      totalGradeValue += grade;
       totalCount++;
       distribution[grade]++;
     }
   });
 
-  const averageMss = totalCount > 0 ? (totalMssValue / totalCount) : 0;
+  const averageGrade = totalCount > 0 ? (totalGradeValue / totalCount) : 0;
 
   let csv = '\ufeff'; // UTF-8 BOM for Excel
   csv += 'BEWERTUNG ÜBERSICHT\n';
@@ -473,7 +473,7 @@ exportCsvButton?.addEventListener('click', () => {
   csv += `Maximale Punktzahl;${max}\n`;
   csv += `Rundungsmodus;${mode}\n`;
   csv += `Anzahl Schüler;${totalCount}\n`;
-  csv += `MSS Durchschnitt;${averageMss.toFixed(2).replace('.', ',')}\n\n`;
+  csv += `Notendurchschnitt;${averageGrade.toFixed(2).replace('.', ',')}\n\n`;
 
   csv += 'NOTENVERTEILUNG\n';
   for (let g = 1; g <= 6; g++) {
