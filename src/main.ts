@@ -56,6 +56,18 @@ const studentTableBody = document.querySelector<HTMLTableSectionElement>('#stude
 
 let students: Student[] = [];
 
+// --- Utilities ---
+
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  return function(...args: Parameters<T>) {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      func(...args);
+    }, wait);
+  };
+}
+
 // --- Core Logic ---
 
 /**
@@ -72,6 +84,8 @@ function saveState(): void {
   };
   localStorage.setItem('bewertungsrechner_state', JSON.stringify(state));
 }
+
+const debouncedSaveState = debounce(saveState, 500);
 
 /**
  * Loads the application state from localStorage
@@ -263,7 +277,7 @@ function updateStudentTable(forceReRender: boolean = false): void {
         students[index].points = target.value;
         updateStudentRow(index);
         calculateOverview();
-        saveState();
+        debouncedSaveState();
       });
 
       studentTableBody.appendChild(row);
@@ -575,10 +589,10 @@ maxPointsInput?.addEventListener('input', () => {
   updateTable();
   updateStudentTable();
   calculateOverview();
-  saveState();
+  debouncedSaveState();
 });
 
-examTitleInput?.addEventListener('input', saveState);
+examTitleInput?.addEventListener('input', debouncedSaveState);
 examDateInput?.addEventListener('change', saveState);
 correctionDateInput?.addEventListener('change', saveState);
 
@@ -724,6 +738,11 @@ if (document.readyState === 'loading') {
   calculateOverview();
   initSectionObserver();
 }
+
+// Ensure state is saved when leaving the page (handling potential unsaved debounced changes)
+window.addEventListener('beforeunload', () => {
+  saveState();
+});
 
 // Service Worker Registration (Non-blocking)
 if ('serviceWorker' in navigator) {
