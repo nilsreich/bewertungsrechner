@@ -59,6 +59,19 @@ let students: Student[] = [];
 // --- Core Logic ---
 
 /**
+ * Utility to debounce function execution.
+ * Prevents performance issues by delaying expensive operations (like localStorage writes)
+ * until the user stops typing.
+ */
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: number | undefined;
+  return function(this: any, ...args: Parameters<T>) {
+    clearTimeout(timeout);
+    timeout = window.setTimeout(() => func.apply(this, args), wait);
+  } as any;
+}
+
+/**
  * Saves the current application state to localStorage
  */
 function saveState(): void {
@@ -72,6 +85,10 @@ function saveState(): void {
   };
   localStorage.setItem('bewertungsrechner_state', JSON.stringify(state));
 }
+
+// Optimization: Debounce saveState for frequent events like 'input'
+// to avoid blocking the main thread with synchronous localStorage writes on every keystroke.
+const debouncedSaveState = debounce(saveState, 500);
 
 /**
  * Loads the application state from localStorage
@@ -263,7 +280,7 @@ function updateStudentTable(forceReRender: boolean = false): void {
         students[index].points = target.value;
         updateStudentRow(index);
         calculateOverview();
-        saveState();
+        debouncedSaveState();
       });
 
       studentTableBody.appendChild(row);
@@ -575,10 +592,10 @@ maxPointsInput?.addEventListener('input', () => {
   updateTable();
   updateStudentTable();
   calculateOverview();
-  saveState();
+  debouncedSaveState();
 });
 
-examTitleInput?.addEventListener('input', saveState);
+examTitleInput?.addEventListener('input', debouncedSaveState);
 examDateInput?.addEventListener('change', saveState);
 correctionDateInput?.addEventListener('change', saveState);
 
