@@ -1,4 +1,5 @@
 import './style.css';
+import { debounce } from './utils.ts';
 
 /**
  * Interfaces für die MSS-Daten
@@ -72,6 +73,12 @@ function saveState(): void {
   };
   localStorage.setItem('bewertungsrechner_state', JSON.stringify(state));
 }
+
+/**
+ * Debounced version of saveState to prevent excessive localStorage writes during typing.
+ * Wait 500ms after last call before saving.
+ */
+const debouncedSaveState = debounce(saveState, 500);
 
 /**
  * Loads the application state from localStorage
@@ -263,7 +270,7 @@ function updateStudentTable(forceReRender: boolean = false): void {
         students[index].points = target.value;
         updateStudentRow(index);
         calculateOverview();
-        saveState();
+        debouncedSaveState();
       });
 
       studentTableBody.appendChild(row);
@@ -426,7 +433,7 @@ confirmImport?.addEventListener('click', () => {
   importArea?.classList.add('hidden');
   updateStudentTable(true);
   calculateOverview();
-  saveState();
+  saveState(); // Immediate save is fine here as it's a single click action
 });
 
 exportCsvButton?.addEventListener('click', () => {
@@ -575,12 +582,12 @@ maxPointsInput?.addEventListener('input', () => {
   updateTable();
   updateStudentTable();
   calculateOverview();
-  saveState();
+  debouncedSaveState();
 });
 
-examTitleInput?.addEventListener('input', saveState);
-examDateInput?.addEventListener('change', saveState);
-correctionDateInput?.addEventListener('change', saveState);
+examTitleInput?.addEventListener('input', debouncedSaveState);
+examDateInput?.addEventListener('change', saveState); // Change event is infrequent enough
+correctionDateInput?.addEventListener('change', saveState); // Change event is infrequent enough
 
 presetButtons.forEach(btn => btn.addEventListener('click', () => {
   if (maxPointsInput) {
@@ -589,7 +596,7 @@ presetButtons.forEach(btn => btn.addEventListener('click', () => {
     updateTable();
     updateStudentTable();
     calculateOverview();
-    saveState();
+    saveState(); // Click is instant, no need to debounce
   }
 }));
 
@@ -600,7 +607,7 @@ clearMaxPoints?.addEventListener('click', () => {
     updateTable();
     updateStudentTable();
     calculateOverview();
-    saveState();
+    saveState(); // Click is instant
     maxPointsInput.focus();
   }
 });
