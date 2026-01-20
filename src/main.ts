@@ -1,4 +1,5 @@
 import './style.css';
+import { debounce } from './utils';
 
 /**
  * Interfaces für die MSS-Daten
@@ -72,6 +73,12 @@ function saveState(): void {
   };
   localStorage.setItem('bewertungsrechner_state', JSON.stringify(state));
 }
+
+/**
+ * Debounced version of saveState to prevent excessive localStorage writes during high-frequency events (e.g. typing).
+ * Improves performance by reducing main thread blocking time.
+ */
+const debouncedSaveState = debounce(saveState, 500);
 
 /**
  * Loads the application state from localStorage
@@ -263,7 +270,7 @@ function updateStudentTable(forceReRender: boolean = false): void {
         students[index].points = target.value;
         updateStudentRow(index);
         calculateOverview();
-        saveState();
+        debouncedSaveState();
       });
 
       studentTableBody.appendChild(row);
@@ -575,10 +582,10 @@ maxPointsInput?.addEventListener('input', () => {
   updateTable();
   updateStudentTable();
   calculateOverview();
-  saveState();
+  debouncedSaveState();
 });
 
-examTitleInput?.addEventListener('input', saveState);
+examTitleInput?.addEventListener('input', debouncedSaveState);
 examDateInput?.addEventListener('change', saveState);
 correctionDateInput?.addEventListener('change', saveState);
 
